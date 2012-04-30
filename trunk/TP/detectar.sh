@@ -1,20 +1,10 @@
+#! /bin/bash
+#lista=`ls $ARRIDIR`
+#a=0
+while [ $a = 0 ]
+do
+	sleep 0.3
+done
 
-
-lista=`ls $ARRIDIR`
-
-function startD
-{
-
-
-
-}
-
-function stopD
-{
-
-
-
-
-}
-
+echo termine
 
