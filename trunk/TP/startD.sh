@@ -1,9 +1,11 @@
-detectar.sh
+#TOD falta el chequeo de la inicializacion de las variables de ambiente
 
-if [ `ps | grep -c top` = 0 ] ; then
-	echo bien
+SELF="startD"
+
+if [ `ps | grep -c detectar.sh` = 0 ] ; then
+	detectar.sh &
 else
-	echo mal
+	echo "el demonio ya esta inicializado" # mandar al log...
 fi
 
 
