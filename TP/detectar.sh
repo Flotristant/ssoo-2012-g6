@@ -69,7 +69,13 @@ function chequearVigenciaSucursal
 #Chequea si el parque no se ejecuta, en ese caso lo ejecuta
 function ejecutarGrabarParque
 {
-
+	lista=`ls $PATH_RECIBIDAS`                                    # cuidado con el path del lugar recibido
+	if [ "$lista" != "" ] ; then
+		if [ `ps | grep -c grabarParque.sh` = 0 ]
+			grabarParque.sh $lista
+			idGrabarParque=`ps | grep grabarParque.sh | cut -f 2 -d " "` 
+		fi
+	fi
 }
 
 while [ 1 ]
