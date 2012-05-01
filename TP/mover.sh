@@ -75,7 +75,7 @@ function crearMsjLog
 	#$1 = msj informativo
 	#$2 = msj porque
 	export user=$(whoami)
-	fechaHora=`date +"%m/%d/%y %H:%m"`
+	fechaHora=`date +"%m/%d/%y %H:%M"`
 	usuario=$user
 	comando="mover"
 	msj=$1
