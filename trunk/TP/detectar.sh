@@ -3,17 +3,19 @@
 
 #PATH_ARRIDIR="$grupo/ARRIDIR"
 #PATH_RECHDIR="$grupo/RECHDIR"
-PATH_ARRIDIR="ARRIDIR"
-PATH_RECHDIR="RECHDIR"
-PATH_SUCURSALES="$grupo/"
+PATH_ARRIDIR="./$ARRIDIR"
+PATH_RECHDIR="./$RECHDIR/"
+PATH_SUCURSALES="Archivos Maestros.csv"
+PATH_RECIBIDAS="./inst_recibidas/"
 
 SELF="detectar"
+TIME_SLEEP=10
 
 # funcion del demonio en si
 function daemon
 {
 	lista=`ls $PATH_ARRIDIR`
-	if [ "$lista" != "" ] ; then
+	if [ -n "$lista" ] ; then
 		valNomArchSucursales $lista
 	fi
 	
@@ -28,14 +30,13 @@ function valNomArchSucursales
 	do
 		region=`echo $file | cut -f 1 -d - `
 		sucursal=`echo $file | cut -f 2 -d -`
-
-		regionValida=`grep -c "^$region,[^,]\+,$sucursal[,[^,]\+]\{5\}$" $PATH_REGIONES`
-
-		if [ $regionValida = 1 ] ; then
+		sucursalValida=`grep -c "^$region,[^,]\+,$sucursal.*$" "$PATH_SUCURSALES"`
+		if [ "$sucursalValida" -eq 1 ] ; then
 			chequearVigenciaSucursal $region $sucursal
 		else
-			# falta el log para poder llamarlo... con "$SELF" "I" "$file: region-sucursal inexistente.\n"
-			mover.sh "$PATH_REGIONES/$file" "$PATH_RECHDIR" "$SELF"
+			#loguearU.sh "$SELF" "I" "$file: region-sucursal invalida."
+			mover.sh "$PATH_ARRIDIR/$file" "$PATH_RECHDIR" "$SELF"
+			echo -e "region-sucursal invalida\n"
 		fi
 	done
 
@@ -47,23 +48,25 @@ function chequearVigenciaSucursal
 	region=$1
 	sucursal=$2
 	
-	sucValida=`grep "^$region,[^,]\+,$sucursal[,[^,]\+]\{5\}$" $PATH_REGIONES`
-	startDate=`echo $sucValida | cut -f 7 -d ,| sed 's-\([0-3][0-9]\)/\([0-1][0-9]\)/\([0-9]\{4\}\)-\3\2\1' `
-	endDate=`echo $sucValida | cut -f 8 -d ,| sed 's-\([0-3][0-9]\)/\([0-1][0-9]\)/\([0-9]\{4\}\)-\3\2\1' `
-	dia=`date +"20%y%m%d"`
+	sucValida=`grep "^$region,[^,]\+,$sucursal.*$" "$PATH_SUCURSALES"`
+	startDate=`echo $sucValida | cut -f 7 -d ,| sed 's-\([0-3][0-9]\)/\([0-1][0-9]\)/\([0-9]\{4\}\)-\3\2\1-' `
+	endDate=`echo $sucValida | cut -f 8 -d ,| sed 's-\([0-3][0-9]\)/\([0-1][0-9]\)/\([0-9]\{4\}\)-\3\2\1-' `
+	dia=`date +"%Y%m%d"`
 	antesDelFin=0
-	if [ -n $endDate  ] ; then
-		if [ $dia -gt $endDate  ] ; then
+	if [ -n "$endDate"  ] ; then
+		if [ "$dia" -gt "$endDate"  ] ; then
 			antesDelFin=1
 		fi
 	fi
 
-	if [ [ $startDate -le $dia] -a [ $antesDelFin = 0 ] ] ; then
-		# falta el log para poder llamarlo... con "$SELF" "I" "$file: sucursal valida.\n"
-		mover.sh "$PATH_REGIONES/$file" "$PATH_RECIBIDAS" "$SELF"                                    # cuidado con el path del lugar recibido
+	if [ "$startDate" -le "$dia" -a "$antesDelFin" = 0 ] ; then
+		#loguearU.sh "$SELF" "I" "$file: sucursal valida."
+		mover.sh "$PATH_ARRIDIR/$file" "$PATH_RECIBIDAS" "$SELF"     
+		echo -e "sucursal valida\n"		
 	else
-		# falta el log para poder llamarlo... con "$SELF" "I" "$file: sucursal no esta vigente.\n"
-		mover.sh "$PATH_REGIONES/$file" "$PATH_RECHDIR" "$SELF"
+		#loguearU.sh "$SELF" "I" "$file: sucursal no esta vigente."
+		mover.sh "$PATH_ARRIDIR/$file" "$PATH_RECHDIR" "$SELF"
+		echo -e "sucursal no vigente \n"
 	fi
 
 }
@@ -71,21 +74,22 @@ function chequearVigenciaSucursal
 #Chequea si el parque no se ejecuta, en ese caso lo ejecuta
 function ejecutarGrabarParque
 {
-	lista=`ls $PATH_RECIBIDAS`                                    # cuidado con el path del lugar recibido
-	if [ "$lista" != "" ] ; then
-		if [ `ps | grep -c grabarParque.sh` = 0 ] ; then
+	lista=`ls $PATH_RECIBIDAS`                                    
+	if [ -n "$lista" -a `ps | grep -c grabarParque.sh` = 0 ] ; then
+		#if [ `ps | grep -c grabarParque.sh` = 0 ] ; then
 			#grabarParque.sh $lista
-			echo grabarParque
+			echo -e "grabarParque\n"
 			idGrabarParque=`ps | grep grabarParque.sh | cut -f 2 -d " "` 
-		fi
+			echo -e "$idGrabarParque\n"
+		#fi
 	fi
 }
 
 while [ 1 ]
 do
 	daemon
-	sleep 30
+	sleep $TIME_SLEEP
 done
 
-echo termine
+echo -e "termine\n"
 

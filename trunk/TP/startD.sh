@@ -3,10 +3,15 @@
 SELF="startD"
 
 if [ `ps | grep -c detectar.sh` = 0 ] ; then
-	detectar.sh &
-	echo termine
+	if [ -n "$ARRIDIR" -a -n "$RECHDIR" ] ; then
+		detectar.sh &
+	else
+		#loguearU.sh "$SELF" "SE" "$ARRIDIR variables de ambiente no inicializadas"
+		echo -e "no esta inicializado el ambiente\n"
+	fi
 else
-	echo "el demonio ya esta inicializado" # mandar al log...
+	#loguearU.sh "$SELF" "E" "demonio ya inicializado"
+	echo -e "el demonio ya esta inicializado\n"
 fi
 
 
