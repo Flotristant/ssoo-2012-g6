@@ -21,7 +21,7 @@ function validarExistenciaDirDestino
 
 	#Primero me quedo con el nombre de archivo que me pasan
 	#basename quita todo lo relativo a un directorio, entonces me quedo con el nombre del archivo solamente
-	directorioDestino=$1
+	directorioDestino=$2
 	
 	if [ -d $directorioDestino ]; then
 		existe=1
