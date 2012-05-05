@@ -1,5 +1,4 @@
 #! /bin/bash
-#lista=`ls $ARRIDIR`
 
 #PATH_ARRIDIR="$grupo/ARRIDIR"
 #PATH_RECHDIR="$grupo/RECHDIR"
@@ -34,7 +33,7 @@ function valNomArchSucursales
 		if [ "$sucursalValida" -eq 1 ] ; then
 			chequearVigenciaSucursal $region $sucursal
 		else
-			#loguearU.sh "$SELF" "I" "$file: region-sucursal invalida."
+			loguearU.sh "$SELF" "I" "$file: region-sucursal invalida."
 			mover.sh "$PATH_ARRIDIR/$file" "$PATH_RECHDIR" "$SELF"
 			echo -e "region-sucursal invalida\n"
 		fi
@@ -60,11 +59,11 @@ function chequearVigenciaSucursal
 	fi
 
 	if [ "$startDate" -le "$dia" -a "$antesDelFin" = 0 ] ; then
-		#loguearU.sh "$SELF" "I" "$file: sucursal valida."
+		loguearU.sh "$SELF" "I" "$file: sucursal valida."
 		mover.sh "$PATH_ARRIDIR/$file" "$PATH_RECIBIDAS" "$SELF"     
 		echo -e "sucursal valida\n"		
 	else
-		#loguearU.sh "$SELF" "I" "$file: sucursal no esta vigente."
+		loguearU.sh "$SELF" "I" "$file: sucursal no esta vigente."
 		mover.sh "$PATH_ARRIDIR/$file" "$PATH_RECHDIR" "$SELF"
 		echo -e "sucursal no vigente \n"
 	fi
