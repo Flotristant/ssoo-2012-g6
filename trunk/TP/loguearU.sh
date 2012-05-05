@@ -1,4 +1,7 @@
 #!/bin/bash
+IFS_ANT=$IFS
+IFS='
+'
 
 #####PARAMETROS######
 
@@ -113,5 +116,7 @@ function loguear
 
 loguear $1 $2 $3
 
+
+IFS=$IFS_ANT
 exit 0
 
