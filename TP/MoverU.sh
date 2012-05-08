@@ -21,7 +21,7 @@ function validarExistenciaDirDestino
 
 	#Primero me quedo con el nombre de archivo que me pasan
 	#basename quita todo lo relativo a un directorio, entonces me quedo con el nombre del archivo solamente
-	directorioDestino=$2
+	directorioDestino=$1
 	
 	if [ -d $directorioDestino ]; then
 		existe=1
@@ -51,7 +51,7 @@ function obtenerUltimaSecuencia
 	for i in $lista
 	do 
 		nombre=${i:0:length}
-		if [ $nombre == $1 ]; then
+		if [ $nombre == $1 ] ; then
 			existe=1
 			#obtengo el numero de secuencia en el directorio y comparo si es mayor que la anterior
 			#lo hago porque el archivo.100 no queda despues del archivo.20
@@ -72,15 +72,9 @@ function crearMsjLog
 {
 	#crea el msj para loguear el movimiento
 
-	#$1 = msj informativo
-	#$2 = msj porque
-	export user=$(whoami)
-	fechaHora=`date +"%m/%d/%y %H:%M"`
-	usuario=$user
-	comando="mover"
-	msj=$1
-	porque=$2
-	msjSalida=$fechaHora";"$usuario";"$comando";"$msj";"$porque
+	#$1 = TIPO MENSAJE
+	#$2 = MENSAJE
+	msjSalida="moverU "$1" "$MENSAJE
 	echo $msjSalida
 }
 
@@ -90,19 +84,19 @@ function crearMsjLog
 cantParametros=$#
 codigoError=0
 if [ $cantParametros -ge 4 ]; then
-	#echo "Demasiados argumentos para buscar (maximo 3)"
+	echo "Demasiados argumentos para buscar (maximo 3)"
 	codigoError=3	
 fi
 
 existeDirDestino=$(validarExistenciaDirDestino $2)
 if [ $existeDirDestino -eq 0 ] ; then 	
-	#echo "El directorio '"$2"' no existe, emito codigo de error 2"
+	echo "El directorio '"$2"' no existe, emito codigo de error 2"
 	codigoError=2
 fi
 
 existeOriginal=$(validarExistenciaArchOrig $1)
 if [ $existeOriginal -eq 0 ] ; then 	
-	#echo "El Archivo '"$1"' no existe, emito codigo de error 1"
+	echo "El Archivo '"$1"' no existe, emito codigo de error 1"
 	codigoError=1
 fi
 ###############################################################################################
@@ -127,24 +121,23 @@ fi
 
 
 #####MSJ SALIDA#####
+chmod 777 loguearU.sh
+
 case $codigoError in
 	"0")
-		msjSalida=$(crearMsjLog "Movimiento Correcto" "Se movio '"$1"' como '"$2$nombreNuevo"'")
+		./loguearU.sh "moverU" "I" "Se-movio-$1-como-$2$nombreNuevo"
 		;;
 	"1")
-		msjSalida=$(crearMsjLog "Movimiento Incorrecto" "El Archivo '"$1"' no existe")
+		./loguearU.sh "moverU"  "SE" "El-Archivo-$1-no-existe-"
 		;;
 	"2")
-		msjSalida=$(crearMsjLog "Movimiento Incorrecto" "El directorio '"$2"' no existe")
+		./loguearU.sh "moverU"  "SE" "El-directorio-$2-no-existe"
 		;;
 	"3")
-		msjSalida=$(crearMsjLog "Movimiento Incorrecto" "Demasiados argumentos para buscar (maximo 3)")
+		./loguearU.sh "moverU"  "SE" "Demasiados-argumentos-para-buscar-(maximo 3)"
 		;;
 esac
-echo $msjSalida
-
-
-exit 0
+exit $codigoError
 
 
 
