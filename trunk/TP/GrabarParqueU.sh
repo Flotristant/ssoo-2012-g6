@@ -542,13 +542,13 @@ if [ $AMBIENTE_OK -eq 0 ] && [ ${estaCorriendo} -ne 1 ] ; then
 			ordenarArchivo $i
 			#moverlo a inst_procesadas
 			#MoverU $INST_RECIBIDAS'/'$i $INSTPROCESADAS $NOMBRE
-			mv $INST_RECIBIDAS'/'$i $INSTPROCESADAS
+			MoverU.sh $INST_RECIBIDAS'/'$i $INSTPROCESADAS'/' $NOMBRE
 			#procesar archivo ordenado
 			procesarArchivoOrdenado $i
 		else
 			#echo "el archivo $i esta repetido"
 			# MoverU $INST_RECIBIDAS $INST_RECHAZADAS $NOMBRE
-			mv $INST_RECIBIDAS'/'$i $INST_RECHAZADAS'/'$i
+			MoverU.sh $INST_RECIBIDAS'/'$i $INST_RECHAZADAS'/' $NOMBRE
 			TIPO='A'
 			loguearU.sh $NOMBRE $TIPO "el_archivo:"$i"_esta_repetido"
 		fi
