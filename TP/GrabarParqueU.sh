@@ -126,7 +126,7 @@ function grabarMensajeError
 {
 	TIPO="E"
 	local mensaje=$1
-	loguearU.sh $NOMBRE $TIPO "$mensaje"
+	LoguearU.sh $NOMBRE $TIPO "$mensaje"
 }
 
 #$1 archivo con bloques de un cliente
@@ -303,7 +303,7 @@ function validarRegistro
 	if [ -z $ID_USUARIO ]; then
 		TIPO="E"
 		MENSAJE="campo_'id_usuario'_no_informado_en_registro:$1"
-		loguearU.sh $NOMBRE $TIPO "$MENSAJE"
+		LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 		#echo "campo id_usuario no informado: $1"
 		es_valido=1
 	else
@@ -312,7 +312,7 @@ function validarRegistro
 			es_valido=1
 			TIPO="E"
 			MENSAJE="cliente_inexistente($ID_USUARIO)_en_registro:$1"
-			loguearU.sh $NOMBRE $TIPO "$MENSAJE"
+			LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 			#echo "cliente inexistente: $ID_USUARIO ( $1 )"
 		fi
 	fi
@@ -320,7 +320,7 @@ function validarRegistro
 	if [ -z $FECHA_OP ]; then
 		TIPO="E"
 		MENSAJE="campo_'fecha'_no_informado_en_registro:$1"
-		loguearU.sh $NOMBRE $TIPO "$MENSAJE"
+		LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 		#echo "campo fecha no informado: $1"
 		es_valido=1
 	else
@@ -328,7 +328,7 @@ function validarRegistro
 		if [ $? -ne 0 ]; then
 			TIPO="E"
 			MENSAJE="campo_'fecha_de_operacion'_invalida_en_registro:$1"
-			loguearU.sh $NOMBRE $TIPO "$MENSAJE"
+			LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 			#echo "fecha de operacion invalida: $1"
 			es_valido=1
 		fi
@@ -337,7 +337,7 @@ function validarRegistro
 	if [ -z $ID_PLAN ] || [ -z $ID_CLASE_SERVICIO ] || [ -z $ID_PROD ]; then
 		TIPO="E"
 		MENSAJE="algun_campo_de_producto_no_informado_en_registro:$1"
-		loguearU.sh $NOMBRE $TIPO "$MENSAJE"
+		LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 		#echo "campos de producto no informados: $1"
 		es_valido=1
 	else
@@ -345,7 +345,7 @@ function validarRegistro
 		if [ $? -ne 0 ]; then
 			TIPO="E"
 			MENSAJE="producto_inexistente_en_registro:$1"
-			loguearU.sh $NOMBRE $TIPO "$MENSAJE"
+			LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 			#echo "producto inexistente: $1"
 			es_valido=1
 		fi
@@ -458,11 +458,11 @@ function mostrarCantidadRegistrosProcesados
 	
 	TIPO="I"
 	MENSAJE="la_cantidad_de_registros_leidos_es:$CANT_REGISTROS_LEIDOS"
-	loguearU.sh $NOMBRE $TIPO "$MENSAJE"
+	LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 	MENSAJE="la_cantidad_de_registros_grabados_en_algun_parque:$CANT_REGISTROS_GRABADOS"
-	loguearU.sh $NOMBRE $TIPO "$MENSAJE"
+	LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 	MENSAJE="la_cantidad_de_registros_rechazados:$CANT_REGISTROS_INVALIDOS"
-	loguearU.sh $NOMBRE $TIPO "$MENSAJE"
+	LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 	
 
 	let TOTAL_DE_CONTROL=CANT_REGISTROS_GRABADOS*2
@@ -470,7 +470,7 @@ function mostrarCantidadRegistrosProcesados
 
 	#echo "total de control: $TOTAL_DE_CONTROL"
 	MENSAJE="el_total_de_control_es_(rechazados+(grabados_en_parque*2)):$TOTAL_DE_CONTROL"
-	loguearU.sh $NOMBRE $TIPO "$MENSAJE"
+	LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 
 }
 
@@ -496,13 +496,13 @@ if [ ${estaCorriendo} -eq 1 ] ; then
 	echo "el proceso ya esta corriendo"
 	TIPO="SE"
 	MENSAJE="el proceso ya esta corriendo"
-	loguearU.sh $NOMBRE $TIPO "$MENSAJE"
+	LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 else
 	if [ -z $ARRIDIR ] || [ -z $RECHDIR ] || [ -z $GRUPO ] || [ -z $MAEDIR ]; then
 		AMBIENTE_OK=1
 		TIPO='SE'
 		MENSAJE="ambiente_no_inicializado"
-		loguearU.sh $NOMBRE $TIPO "$MENSAJE" 
+		LoguearU.sh $NOMBRE $TIPO "$MENSAJE" 
 	else
 		AMBIENTE_OK=0
 		temporal='/home/florencia/SSOO/grupo06/temporales/temp.temp'
@@ -516,10 +516,10 @@ else
 		CANTIDAD=$(echo "$ARCHIVOS" | wc -l)	
 
 		#grabar en el log la cantidad de archivos a procesar
-		#loguearU <comando>> <tipo de mensaje>> <mensaje>>
+		#LoguearU <comando>> <tipo de mensaje>> <mensaje>>
 		TIPO='I'
 		MENSAJE="inicio de GrabarParqueU la cantidad de archivos a procesar son: $CANTIDAD"
-		loguearU.sh $NOMBRE $TIPO "$MENSAJE"
+		LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 		if [ $? -ne 0 ]; then
 			echo "error al loguear"
 		fi
@@ -533,7 +533,7 @@ if [ $AMBIENTE_OK -eq 0 ] && [ ${estaCorriendo} -ne 1 ] ; then
 	for i in ${ARCHIVOS}
 	do
 		TIPO='I'
-		loguearU.sh $NOMBRE $TIPO "se_inicia_el_proceso_del_archivo:$i"
+		LoguearU.sh $NOMBRE $TIPO "se_inicia_el_proceso_del_archivo:$i"
 
 		#verificar que no este duplicado
 		NUEVO_NOMBRE=$INSTPROCESADAS'/'$i
@@ -550,7 +550,7 @@ if [ $AMBIENTE_OK -eq 0 ] && [ ${estaCorriendo} -ne 1 ] ; then
 			# MoverU $INST_RECIBIDAS $INST_RECHAZADAS $NOMBRE
 			MoverU.sh $INST_RECIBIDAS'/'$i $INST_RECHAZADAS'/' $NOMBRE
 			TIPO='A'
-			loguearU.sh $NOMBRE $TIPO "el_archivo:"$i"_esta_repetido"
+			LoguearU.sh $NOMBRE $TIPO "el_archivo:"$i"_esta_repetido"
 		fi
 	done
 	mostrarCantidadRegistrosProcesados
