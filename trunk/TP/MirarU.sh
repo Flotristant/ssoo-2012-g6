@@ -17,7 +17,7 @@ ERROR_TIPO_MENS=2
 ARCH_INEXISTENTE=3
 DIR_INEXISTENTE=4
 ERROR_MAX_LINEAS=5
-if [ -z $LOGDIR ] && [ -z $LOGEXT ] && [ -z $GRUPO ]; then
+if [ -z $LOGDIR ] || [ -z $LOGEXT ] || [ -z $GRUPO ]; then
 	DIR_LOG=../logdir
 	LOGEXT=log
 else
@@ -26,7 +26,7 @@ fi
 
 function mostrar_ayuda {
 	echo
-	echo "Uso: $nombre -<opcion> parametro"
+	echo "Uso: $nombre -<opcion> -c [comando] parametro"
 	echo "	-h: muestra ayuda"
 	echo "	-c <comando>: comando a buscar (obligatorio)"
 	echo "	-t <[I-A-E-SE]>: tipo de mensaje"
@@ -55,7 +55,6 @@ do
 			echo "Archivo de salida $2..."
  	;;
 		-[0-9]*)
-			echo "entro en validacion de numero"
 			echo $1 | grep --silent "^-[0-9].*$"
 			if [ $? -eq 0 ] ; then
 				cant_lineas_desde_final=$(echo $1 | sed s/'-'//)
@@ -71,21 +70,19 @@ done
 #Verificar existencia de archivos
 filename="$comando.$LOGEXT"
 filepath="$DIR_LOG/$filename"
-if [ ! -f $filepath ]
-then
+if [ ! -f $filepath ]; then
 	echo "El archivo de log $filepath no existe." >&2
 	exit $ARCH_INEXISTENTE
 fi
 
-if [ "$archivo_output" != "" ] && [ ! -f $archivo_output ]
-then
+if [ "$archivo_output" != "" ] && [ ! -f $archivo_output ] ; then
 	touch $archivo_output
 fi
 
 if [ "$filtro_tipo" != "$filtro_default" ] && [ "$filtro_tipo" != "I" ] && [ "$filtro_tipo" != "A" ] && [ "$filtro_tipo" != "E" ] && [ "$filtro_tipo" != "SE" ]
 then
 	echo "Tipo de mensaje inexistente" >&2
-	mostrar_help
+	mostrar_ayuda
 	exit $ERROR_TIPO_MENS
 fi
 
@@ -104,6 +101,7 @@ if [ $cant_lineas_desde_final -ne 0 ] ; then
 	let inicio=inicio-"${cant_lineas_desde_final}"
 fi	
 
+#con el sed selecciono las últimas n lineas#
 for linea in `sed -n $inicio,"$cantidad_lineas_total"p $filepath`;
 do
 	
