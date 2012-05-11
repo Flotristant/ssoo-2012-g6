@@ -1,11 +1,9 @@
 #! /bin/bash
 
-#PATH_ARRIDIR="$grupo/ARRIDIR"
-#PATH_RECHDIR="$grupo/RECHDIR"
-PATH_ARRIDIR="./$ARRIDIR"
-PATH_RECHDIR="./$RECHDIR/"
-PATH_SUCURSALES="Archivos Maestros.csv"
-PATH_RECIBIDAS="./inst_recibidas/"
+PATH_ARRIDIR="$GRUPO/$ARRIDIR"
+PATH_RECHDIR="$GRUPO/$RECHDIR/"
+PATH_SUCURSALES="$GRUPO/$MAEDIR/sucu.mae"
+PATH_RECIBIDAS="$GRUPO/inst_recibidas/"
 
 SELF="detectar"
 TIME_SLEEP=10
@@ -68,16 +66,20 @@ function chequearVigenciaSucursal
 }
 
 #Chequea si el parque no se ejecuta, en ese caso lo ejecuta
+#GREP: El código de salida es 0 si se selecciona alguna línea, y 1 en caso contrario; si ocurrió algún
+#error, y no se indicó -q, el código de salida es 2.
+
 function ejecutarGrabarParque
 {
 	lista=`ls $PATH_RECIBIDAS`                                    
-	if [ -n "$lista" -a `ps | grep -c grabarParque.sh` = 0 ] ; then
-		#if [ `ps | grep -c grabarParque.sh` = 0 ] ; then
-			#grabarParque.sh $lista
+	if [ -n "$lista" ]; then
+		ps -C "GrabarParqueU.sh"|grep --silent 'GrabarParqueU'
+		if [ $? -eq 1 ] ; then
+			GrabarParqueU.sh &
 			echo -e "grabarParque\n"
-			idGrabarParque=`ps | grep grabarParque.sh | cut -f 2 -d " "` 
+			idGrabarParque=`ps -C 'GrabarParqueU.sh' -o pid=` 
 			echo -e "$idGrabarParque\n"
-		#fi
+		fi
 	fi
 }
 
