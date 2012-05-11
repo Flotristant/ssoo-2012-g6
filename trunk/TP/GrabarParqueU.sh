@@ -1,4 +1,12 @@
 #! /bin/bash
+
+########################################
+#		Comando GrabarParqueU.sh	   #	
+#			Version 4.0 			   #
+########################################
+
+
+
 function estaCorriendoApp
 {
 	local DATO
@@ -8,11 +16,8 @@ function estaCorriendoApp
 	ps -C "GrabarParqueU.sh"|grep 'GrabarParqueU' > "$temporal"
 	DATO=$?
 	local activo=1
-	echo "dato: $DATO"
-
 	if [ ${DATO} -eq 0 ]; then
 		CANT=$(cat "$temporal"|grep -c 'GrabarParqueU')
-		echo $CANT
 		if [ $CANT -eq 1 ] ; then
 			activo=0
 		fi
@@ -21,6 +26,32 @@ function estaCorriendoApp
 		rm "$GRUPO/temporales/temporal.concurrencia"
 	fi
 	return $activo
+}
+
+function estaCorriendoApp2
+{
+	OLDIFS=$IFS
+	IFS='
+	'	
+
+	local PIDS
+	local cant	
+	local activo=1
+	
+	PIDS=$(pgrep 'GrabarParqueU')
+	for i in ${PIDS}
+	do
+		let cant=cant+1
+	done
+
+	echo "cant: $cant ids: $PIDS"
+
+	if [ $cant -eq 1 ] ; then
+		activo=0
+	fi
+	
+	IFS=$OLDIFS
+	return $activo	
 }
 
 function ordenarArchivo
@@ -156,7 +187,7 @@ function procesarBloquesCliente
 					#echo "se rechaza porque es el primero y no es cabecera: $j"
 					echo $j >> "$ARCHIVO_RECHAZADOS"	
 					let CANT_REGISTROS_INVALIDOS=CANT_REGISTROS_INVALIDOS+1
-					mens="se_encontro_detalle_sin_cabecera"
+					mens="se encontro detalle sin cabecera"
 					grabarMensajeError $mens	
 				fi		
 			else			
@@ -186,14 +217,14 @@ function procesarBloquesCliente
 								echo $CABECERA >> "$ARCHIVO_RECHAZADOS"
 								let CANT_REGISTROS_INVALIDOS=CANT_REGISTROS_INVALIDOS+1
 								CABECERA=$j
-								mens="se_encontro_cabecera_sin_detalle"
+								mens="se encontro cabecera sin detalle"
 								grabarMensajeError $mens
 							else
 								#echo "no es cabecera ni detalle"
 								#no es cabecera ni detalle
 								echo $j >> "$ARCHIVO_RECHAZADOS"	
 								let CANT_REGISTROS_INVALIDOS=CANT_REGISTROS_INVALIDOS+1
-								mens="el_registro_no_es_cabecera_ni_detalle"
+								mens="el registro no es cabecera ni detalle"
 								grabarMensajeError $mens
 							fi	
 						fi 
@@ -205,7 +236,7 @@ function procesarBloquesCliente
 							#si leo un detalle y ya habia leido uno, lo rechazo
 							echo $j >> "$ARCHIVO_RECHAZADOS"	
 							let CANT_REGISTROS_INVALIDOS=CANT_REGISTROS_INVALIDOS+1	
-							mens="se_encontro_detalle_sin_cabecera"
+							mens="se encontro detalle sin cabecera"
 							grabarMensajeError $mens
 						else
 							#echo "ya tengo detalle,el leido no es detalle, valido que sea cabecera"
@@ -222,7 +253,7 @@ function procesarBloquesCliente
 								#no es cabecera ni detalle
 								echo $j >> "$ARCHIVO_RECHAZADOS"
 								let CANT_REGISTROS_INVALIDOS=CANT_REGISTROS_INVALIDOS+1	
-								mens="el_registro_no_es_cabecera_ni_detalle"
+								mens="el registro no es cabecera ni detalle"
 								grabarMensajeError $mens
 							fi
 						fi
@@ -233,7 +264,7 @@ function procesarBloquesCliente
 			#echo "se rechaza el registro por cantidad invalida de campos: $j"
 			echo $j >> "$ARCHIVO_RECHAZADOS"
 			let CANT_REGISTROS_INVALIDOS=CANT_REGISTROS_INVALIDOS+1	
-			mens="se_rechaza_el_registro_por_cantidad_invalida_de_campos"
+			mens="se rechaza el registro por cantidad invalida de campos"
 			grabarMensajeError $mens
 		fi		
 	done
@@ -245,14 +276,14 @@ function procesarBloquesCliente
 		if [ ! -z $CABECERA ]; then
 			echo $CABECERA >> "$ARCHIVO_RECHAZADOS"
 			let CANT_REGISTROS_INVALIDOS=CANT_REGISTROS_INVALIDOS+1
-			mens="se_encontro_cabecera_sin_detalle"
+			mens="se encontro cabecera sin detalle"
 			grabarMensajeError $mens
 		fi
 		if [ ! -z $DETALLE ]; then
 			#echo "**ERROR ESTO NO DEBERIA SUCEDER**"
 			echo $DETALLE >> "$ARCHIVO_RECHAZADOS"
 			let CANT_REGISTROS_INVALIDOS=CANT_REGISTROS_INVALIDOS+1	
-			mens="se_encontro_detalle_sin_cabecera"
+			mens="se encontro detalle sin cabecera"
 			grabarMensajeError $mens
 		fi
 	fi
@@ -302,7 +333,7 @@ function validarRegistro
 
 	if [ -z $ID_USUARIO ]; then
 		TIPO="E"
-		MENSAJE="campo_'id_usuario'_no_informado_en_registro:$1"
+		MENSAJE="campo 'id usuario' no informado en registro:$1"
 		LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 		#echo "campo id_usuario no informado: $1"
 		es_valido=1
@@ -311,7 +342,7 @@ function validarRegistro
 		if [ $? -ne 0 ]; then
 			es_valido=1
 			TIPO="E"
-			MENSAJE="cliente_inexistente($ID_USUARIO)_en_registro:$1"
+			MENSAJE="cliente inexistente($ID USUARIO) en registro:$1"
 			LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 			#echo "cliente inexistente: $ID_USUARIO ( $1 )"
 		fi
@@ -319,7 +350,7 @@ function validarRegistro
 
 	if [ -z $FECHA_OP ]; then
 		TIPO="E"
-		MENSAJE="campo_'fecha'_no_informado_en_registro:$1"
+		MENSAJE="campo 'fecha' no informado en registro:$1"
 		LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 		#echo "campo fecha no informado: $1"
 		es_valido=1
@@ -327,7 +358,7 @@ function validarRegistro
 		validarFecha $FECHA_OP
 		if [ $? -ne 0 ]; then
 			TIPO="E"
-			MENSAJE="campo_'fecha_de_operacion'_invalida_en_registro:$1"
+			MENSAJE="campo 'fecha de operacion' invalida en registro:$1"
 			LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 			#echo "fecha de operacion invalida: $1"
 			es_valido=1
@@ -336,7 +367,7 @@ function validarRegistro
 
 	if [ -z $ID_PLAN ] || [ -z $ID_CLASE_SERVICIO ] || [ -z $ID_PROD ]; then
 		TIPO="E"
-		MENSAJE="algun_campo_de_producto_no_informado_en_registro:$1"
+		MENSAJE="algun campo de producto no informado en registro:$1"
 		LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 		#echo "campos de producto no informados: $1"
 		es_valido=1
@@ -344,7 +375,7 @@ function validarRegistro
 		validarProducto $ID_PLAN $ID_CLASE_SERVICIO $ID_PROD
 		if [ $? -ne 0 ]; then
 			TIPO="E"
-			MENSAJE="producto_inexistente_en_registro:$1"
+			MENSAJE="producto inexistente en registro:$1"
 			LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 			#echo "producto inexistente: $1"
 			es_valido=1
@@ -457,11 +488,11 @@ function mostrarCantidadRegistrosProcesados
 	#echo "cantidad de registros grabados en algun parque: $CANT_REGISTROS_GRABADOS"
 	
 	TIPO="I"
-	MENSAJE="la_cantidad_de_registros_leidos_es:$CANT_REGISTROS_LEIDOS"
+	MENSAJE="la cantidad de registros leidos es:$CANT_REGISTROS_LEIDOS"
 	LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
-	MENSAJE="la_cantidad_de_registros_grabados_en_algun_parque:$CANT_REGISTROS_GRABADOS"
+	MENSAJE="la cantidad de registros grabados en algun parque:$CANT_REGISTROS_GRABADOS"
 	LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
-	MENSAJE="la_cantidad_de_registros_rechazados:$CANT_REGISTROS_INVALIDOS"
+	MENSAJE="la cantidad de registros rechazados:$CANT_REGISTROS_INVALIDOS"
 	LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 	
 
@@ -469,17 +500,10 @@ function mostrarCantidadRegistrosProcesados
 	let TOTAL_DE_CONTROL=TOTAL_DE_CONTROL+CANT_REGISTROS_INVALIDOS
 
 	#echo "total de control: $TOTAL_DE_CONTROL"
-	MENSAJE="el_total_de_control_es_(rechazados+(grabados_en_parque*2)):$TOTAL_DE_CONTROL"
+	MENSAJE="el total de control es (rechazados + ( grabados en parque * 2 ) ):$TOTAL_DE_CONTROL"
 	LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
 
 }
-
-########TODO:BORRAR##############################################
-#MAEDIR='/home/florencia/SSOO/grupo06/maedir'                   #
-#GRUPO='/home/florencia/SSOO/grupo06'							#
-#ARRIDIR=$GRUPO'/arribos'										#
-#RECHDIR=$GRUPO'/rechazados'									#
-#################################################################
 
 ##VARIABLES DE CONTROL GLOBALES##
 CANT_REGISTROS_LEIDOS=0
@@ -489,11 +513,11 @@ TOTAL_DE_CONTROL=0
 NOMBRE='GrabarParqueU'
 
 #valido si ya esta corriendo
-estaCorriendoApp
+estaCorriendoApp2
 estaCorriendo=$?
 AMBIENTE_OK=0
 if [ ${estaCorriendo} -eq 1 ] ; then
-	echo "el proceso ya esta corriendo"
+	#echo "el proceso ya esta corriendo"
 	TIPO="SE"
 	MENSAJE="el proceso ya esta corriendo"
 	LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
@@ -501,7 +525,7 @@ else
 	if [ -z $ARRIDIR ] || [ -z $RECHDIR ] || [ -z $GRUPO ] || [ -z $MAEDIR ]; then
 		AMBIENTE_OK=1
 		TIPO='SE'
-		MENSAJE="ambiente_no_inicializado"
+		MENSAJE="ambiente no inicializado"
 		LoguearU.sh $NOMBRE $TIPO "$MENSAJE" 
 	else
 		AMBIENTE_OK=0
@@ -511,12 +535,16 @@ else
 		INSTPROCESADAS=$GRUPO'/inst_procesadas'
 		INST_RECIBIDAS=$GRUPO'/inst_recibidas'			
 		INST_RECHAZADAS=$GRUPO'/inst_rechazadas'
+		
+		if [ ! -d "$GRUPO/temporales" ]; then
+			mkdir "$GRUPO/temporales"
+		fi
 
 		ARCHIVOS=$(ls -1 $INST_RECIBIDAS)
 		CANTIDAD=$(echo "$ARCHIVOS" | wc -l)	
 
 		#grabar en el log la cantidad de archivos a procesar
-		#LoguearU <comando>> <tipo de mensaje>> <mensaje>>
+		#loguearU <comando>> <tipo de mensaje>> <mensaje>>
 		TIPO='I'
 		MENSAJE="inicio de GrabarParqueU la cantidad de archivos a procesar son: $CANTIDAD"
 		LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
@@ -536,7 +564,7 @@ if [ $AMBIENTE_OK -eq 0 ] && [ ${estaCorriendo} -ne 1 ] ; then
 		LoguearU.sh $NOMBRE $TIPO "se_inicia_el_proceso_del_archivo:$i"
 
 		#verificar que no este duplicado
-		NUEVO_NOMBRE=$INSTPROCESADAS'/'$i
+		NUEVO_NOMBRE=$INSTPROCESADAS'/'$i'.0'
 		if [ ! -f $NUEVO_NOMBRE ] ; then
 			#ordenar archivo
 			ordenarArchivo $i
@@ -550,7 +578,7 @@ if [ $AMBIENTE_OK -eq 0 ] && [ ${estaCorriendo} -ne 1 ] ; then
 			# MoverU $INST_RECIBIDAS $INST_RECHAZADAS $NOMBRE
 			MoverU.sh $INST_RECIBIDAS'/'$i $INST_RECHAZADAS'/' $NOMBRE
 			TIPO='A'
-			LoguearU.sh $NOMBRE $TIPO "el_archivo:"$i"_esta_repetido"
+			LoguearU.sh $NOMBRE $TIPO "el archivo:"$i" esta repetido"
 		fi
 	done
 	mostrarCantidadRegistrosProcesados
