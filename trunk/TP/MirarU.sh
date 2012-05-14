@@ -26,7 +26,7 @@ fi
 
 function mostrar_ayuda {
 	echo
-	echo "Uso: $nombre -<opcion> -c [comando] parametro"
+	echo "Uso: $nombre -<opcion> -c [comando]"
 	echo "	-h: muestra ayuda"
 	echo "	-c <comando>: comando a buscar (obligatorio)"
 	echo "	-t <[I-A-E-SE]>: tipo de mensaje"
