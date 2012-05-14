@@ -1,0 +1,44 @@
+Instrucciones de LoguearU TP so 75.08 2012 Copyright (c)
+
+Función:
+	-Este comando se encarga de escribir archivos de logs para cada comando con ciertos eventos propios de cada uno.
+
+Parámetros:
+	-Recibe 3 Parámetros:
+		-Comando(1)
+		-Tipo de Msj.(2)
+		-Msj.(3)
+		#Los 3 parámetros son obligatorios, si recibe menos o más de 3 parámetros arroja error.
+
+		(1) - Es el comando que llama a LoguearU.sh, con este parámetro, LoguearU se encarga de escribir en el archivo de log correspondiente. 
+			Ej: Comando=IniciarU - Entonces escribe en el archivo IniciarU.log.
+
+		(2) - Existen 4 tipos de msjs. 
+				- I = Informativo - Msjs. explicativos sobre el curso de ejecución del comando.
+				- A = Alerta - Msjs. de alerta pero que no afectan la continuidad de ejecución del comando.
+				- E = Error - Msjs. De error.
+				- SE = Error Severo - Msjs. de errores que provocan la cancelación del comando.
+		
+		(3) - Es el msj. que se escribirá en el archivo de log.
+
+
+Variables de ambiente:
+	-LoguearU.sh utiliza las siguientes variables de ambiente:
+		-grupo(4)
+		-directorio de logs(5)
+		-extensión(6)
+		-tamaño(7)
+
+		(4) Establece el path en el cual se encuentra la raiz de la aplicación.
+		(5) Establece el directorio de log que seleccionó el usuario durante la instalación (por defecto "log").
+		(6) Establece la extensión de los archivos de logs que seleccionó el usuario durante la instalación (por defecto ".log").
+		(7) Establece el tamaño de los archivos de logs (por defecto 100KB).
+		
+Ejemplo de uso:
+	./LoguearU.sh "miComando" "I" "Esta-es-una-prueba-de-una-llamada-a-LoguearU.sh"
+	Resultado:
+		Escribe en el archivo miComando.log la siguiente linea:
+			-sergio 05-07-2012 21:39:05 comando miComando: [I] Esta es una prueba de una llamada a LoguearU.sh
+
+
+

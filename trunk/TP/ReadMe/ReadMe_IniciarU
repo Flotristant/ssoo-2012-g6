@@ -1,0 +1,22 @@
+Instrucciones de IniciarU TP so 75.08 2012 Copyright (c)
+
+1- Este comando se encarga de inicializar el ambiente de trabajo para poder manipular los archivos y realizar consultas sobre los mismos, no recibe parámetro alguno.
+
+2- Desde los directorios de binario (por defecto lleva el nombre "bin") ejecutamos el script de la siguiente manera:
+	> ./iniciarU.sh
+
+3- Se nos presentará una pantalla donde se podran ver los elementos existentes e inexistentes del sistema(directorios y archivos).
+
+4- En caso de haber elementos inexistentes se nos dira que el estado del sistema esta "PENDIENTE DE INICIALIZACIÓN", con lo cual debemos ejecutar nuevamente la instalación dado que no se concreto de manera satisfactoria.
+
+5- En caso de no haber elementos inexistentes se nos dira que el estado del sistema es "INICIALIZADO" y se nos mostrará las variables del sistema.
+
+6- Se procede a realizar una verificación de los permisos necesarios para la manipulación de los archivos.
+
+7- Si el ambiente ya esta inicializado al ejecutar el script se nos informará y se nos dirá las variables del sistema.
+
+8- Si todo se dió correctamente (Busqueda del archivo de configuración,Inicialización y Permisos) se ejecuta internamente el comando StartD.sh que ejecuta a su vez el script DetectarU.sh
+
+
+
+
