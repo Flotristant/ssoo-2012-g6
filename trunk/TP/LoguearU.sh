@@ -1,4 +1,5 @@
 #!/bin/bash
+
 IFS_ANT=$IFS
 IFS='
 '
@@ -7,7 +8,7 @@ IFS='
 
 #1 = COMANDO que llamo a loguear
 #2 = TIPO DE MENSAJE 
-#3 = MENSAJE
+#3 = MENSAJE <- no debe contener espacios
 
 #####CODIGOS DE ERROR#####
 errorCantParametros=1
@@ -18,35 +19,33 @@ cantParametros=3
 
 function obtenerDirectorioLog
 {
+	local logdir
 	#El directorio de log puede venir por variable de ambiente o ser seteado por default
-	if [ ! -d $1 ]; then
-		log=../logdir
+	if [ -z $LOGDIR ] || [ -z $GRUPO ] ; then
+		logdir=../logdir
 	else
-		log=$1
+		logdir="$GRUPO/$LOGDIR"
 	fi
-	echo $log
+	echo $logdir
 }
 
 function obtenerExtensionArchivosLog
 {
 	#La extension puede venir por variable de ambiente o ser seteada por default
-	if [ -z $1 ]; then
-		extension=.log
-	else
-		extension=$1
+	if [ -z $LOGEXT ]; then
+		LOGEXT=log
 	fi
-	echo $extension
+	echo $LOGEXT
 }
 
 function obtenerMaximoTamanio
 {
 	#El tamanio maximo del archivo de log me puede venir por var de ambiente o seteada por default
-	if [ -z $1 ]; then
-		tamDato=`expr 100 \* 1024 \* 8`
-	else
-		tamDato=$1
+	if [ -z $DATASIZE ]; then
+		DATASIZE=`expr 100 \* 1024 \* 8`
+		#DATASIZE=500
 	fi
-	echo $tamDato
+	echo $DATASIZE
 }
 
 
@@ -64,6 +63,7 @@ function loguear
 {
 	##Valido Cantidad de parametros
 	if [ $# -ne $cantParametros ]; then
+		echo "LOG: $1 $2 $3"
 		msj=$(msjDeError $0 "Cantidad de parametros invalida $#")
 		echo -e $msj
 		exit $errorCantParametros
@@ -84,8 +84,9 @@ function loguear
 		extlog=$(obtenerExtensionArchivosLog $LOGEXT)
 	else
 		dirlog="$PWD/confdir";
-		extlog="log";
+		extlog=".log";
 	fi
+
 	#verifico la existencia de los directorios
 	#Cada comando tiene un archivo de log	
 	filename="$1$extlog"
@@ -109,14 +110,14 @@ function loguear
 	
 	#Escribo en el archivo
 	echo "$user $date comando $1: [$2] $3" >> $filepath
+	
 
 	#obtengo el tamanio del archivo
 	tamanioArchivo=$(stat -c%s "$filepath")
-	let tamanioArchivo=($tamanioArchivo/1048576)	
-	tamanioMaximo=$(obtenerMaximoTamanio $DATASIZE)
+	tamanioMaximo=$(obtenerMaximoTamanio)
 
 	#Verifico el tamanio del archivo de log
-	if [ $tamanioArchivo -gt $tamanioMaximo ]; then
+	if [ $tamanioArchivo -ge $tamanioMaximo ]; then
 		echo "$user $date comando $1: [A] ¡Log excedido!" >> $filepath 
 		#Trunco el archivo
 		file_lines=`cat $filepath | wc -l`
@@ -124,9 +125,7 @@ function loguear
 		sed -i 1,+${file_lines}d $filepath
 	fi
 }
+
 loguear $1 $2 $3
-
-
 IFS=$IFS_ANT
 exit 0
-
