@@ -19,7 +19,7 @@ DIR_INEXISTENTE=4
 ERROR_MAX_LINEAS=5
 if [ -z $LOGDIR ] || [ -z $LOGEXT ] || [ -z $GRUPO ]; then
 	DIR_LOG=../logdir
-	LOGEXT=log
+	LOGEXT=.log
 else
 	DIR_LOG=$GRUPO'/'$LOGDIR
 fi
@@ -68,8 +68,16 @@ do
 done
 
 #Verificar existencia de archivos
-filename="$comando.$LOGEXT"
-filepath="$DIR_LOG/$filename"
+filename="$comando$LOGEXT"
+
+if [ $comando != "InstalarU" ] 
+then
+	filepath="$DIR_LOG/$filename"
+
+else
+	filepath=$GRUPO'/confdir/'$filename
+fi
+
 if [ ! -f $filepath ]; then
 	echo "El archivo de log $filepath no existe." >&2
 	exit $ARCH_INEXISTENTE

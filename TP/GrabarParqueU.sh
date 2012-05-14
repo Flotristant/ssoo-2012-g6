@@ -5,8 +5,6 @@
 #			Version 4.0 			   #
 ########################################
 
-
-
 function estaCorriendoApp
 {
 	local DATO
@@ -43,8 +41,6 @@ function estaCorriendoApp2
 	do
 		let cant=cant+1
 	done
-
-	echo "cant: $cant ids: $PIDS"
 
 	if [ $cant -eq 1 ] ; then
 		activo=0
@@ -87,41 +83,48 @@ function procesarArchivoOrdenado
 	do
 		let CANT_REGISTROS_LEIDOS=CANT_REGISTROS_LEIDOS+1
 		id_cliente=$(echo $i | cut -d ',' -f 1)
-		#echo "procesando $id_cliente"
-		if [ $primer_registro -eq 1 ]; then
-			echo "$i" >> "$temporal"
-			let cont=cont+1
-			primer_registro=0
-		else
-			if [ $id_cliente -eq $id_cliente_anterior ]; then
+		if [ ! -z $id_cliente ] ; then 
+			#echo "procesando $id_cliente"
+			if [ $primer_registro -eq 1 ]; then
 				echo "$i" >> "$temporal"
 				let cont=cont+1
+				primer_registro=0
 			else
-				#echo "ids diferentes: $id_cliente $id_cliente_anterior"
-				if [ $cont -ge 2 ] ; then
-					procesarBloquesCliente $temporal $NOMBRE_ARCHIVO			
+				if [ $id_cliente -eq $id_cliente_anterior ]; then
+					echo "$i" >> "$temporal"
+					let cont=cont+1
 				else
-					let CANT_REGISTROS_INVALIDOS=CANT_REGISTROS_INVALIDOS+1	
-					#echo "se rechaza bloque ($id_cliente_anterior) por cantidad invalida de registros: $cont"
-					cat $temporal >> "$ARCHIVO_RECHAZADOS"
-					echo "***archivo temporal***"
-					cat $temporal
-					rm $temporal
+					#caso en que leo un nuevo id_cliente, entonces proceso el archivo temporal armado hasta el momento.
+					if [ $cont -ge 2 ] ; then
+						procesarBloquesCliente $temporal $NOMBRE_ARCHIVO			
+					else
+						let CANT_REGISTROS_INVALIDOS=CANT_REGISTROS_INVALIDOS+1	
+						grabarMensajeError "se rechaza bloque ($id_cliente_anterior) por cantidad invalida de registros: $cont" 
+						cat $temporal >> "$ARCHIVO_RECHAZADOS"
+						rm $temporal
+					fi
+					#caso en que leí un nuevo registro con id_cliente diferente, borro archivo temporal, grabo uno nuevo.
+					cont=1
+					if  [ -e "$temporal" ]; then
+						rm $temporal
+					fi
+					echo "$i" >> "$temporal"	
 				fi
-				cont=1
-				rm $temporal
-				echo "$i" >> "$temporal"	
 			fi
-		fi
-		id_cliente_anterior=$id_cliente
+			id_cliente_anterior=$id_cliente
+	else
+		let CANT_REGISTROS_INVALIDOS=CANT_REGISTROS_INVALIDOS+1	
+		grabarMensajeError "se rechaza bloque por campo id_cliente vacío" 
+		echo $i >> "$ARCHIVO_RECHAZADOS"			
+	fi
 	done
 	#valido ultimo bloque
-	#echo "VALIDACION ULTIMO BLOQUE..."
 	if [ $cont -ge 2 ] ; then
 		procesarBloquesCliente $temporal $NOMBRE_ARCHIVO			
 	else
 		let CANT_REGISTROS_INVALIDOS=CANT_REGISTROS_INVALIDOS+1	
 		#echo "se rechaza bloque por contener un solo registro: $cont"
+		grabarMensajeError "se rechaza bloque ($id_cliente_anterior) por cantidad invalida de registros: $cont" 
 		cat $temporal >> "$ARCHIVO_RECHAZADOS"
 	fi
 	if [ -e $temporal ]; then
@@ -344,6 +347,7 @@ function validarRegistro
 			TIPO="E"
 			MENSAJE="cliente inexistente($ID USUARIO) en registro:$1"
 			LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
+			es_valido=1
 			#echo "cliente inexistente: $ID_USUARIO ( $1 )"
 		fi
 	fi
@@ -392,6 +396,7 @@ function buscarCliente
 }
 
 # $1 fecha en formato: dd/mm/aaaa
+# la fecha debe estar dentro del corriente año y ser menor a la fecha actual.
 function validarFecha
 {
 	local dia_registro=$( echo $1 | cut -d '/' -f 1)
@@ -410,10 +415,6 @@ function validarFecha
 			if [ $mes_registro -lt $mes ]; then
 				return 0
 			fi	
-		fi
-	else
-		if [ $anio_registro -lt $anio ]; then
-			return 0
 		fi
 	fi
 	return 1
@@ -512,6 +513,11 @@ CANT_REGISTROS_GRABADOS=0
 TOTAL_DE_CONTROL=0
 NOMBRE='GrabarParqueU'
 
+if ! [ -z $GRUPO ] ; then 
+	if  ! [ -d "$GRUPO/temporales" ] ; then
+		mkdir "$GRUPO/temporales"
+	fi
+fi
 #valido si ya esta corriendo
 estaCorriendoApp2
 estaCorriendo=$?
@@ -521,24 +527,20 @@ if [ ${estaCorriendo} -eq 1 ] ; then
 	TIPO="SE"
 	MENSAJE="el proceso ya esta corriendo"
 	LoguearU.sh $NOMBRE $TIPO "$MENSAJE"
+	exit 1
 else
 	if [ -z $ARRIDIR ] || [ -z $RECHDIR ] || [ -z $GRUPO ] || [ -z $MAEDIR ]; then
 		AMBIENTE_OK=1
-		TIPO='SE'
-		MENSAJE="ambiente no inicializado"
-		LoguearU.sh $NOMBRE $TIPO "$MENSAJE" 
+		echo "ambiente no inicializado"
+		exit 1
 	else
 		AMBIENTE_OK=0
-		temporal='/home/florencia/SSOO/grupo06/temporales/temp.temp'
+		temporal="$GRUPO/temporales/temp.temp"
 		ORDDIR=$GRUPO'/inst_ordenadas'
 		PARQUEDIR=$GRUPO'/parque_instalado'	
 		INSTPROCESADAS=$GRUPO'/inst_procesadas'
 		INST_RECIBIDAS=$GRUPO'/inst_recibidas'			
 		INST_RECHAZADAS=$GRUPO'/inst_rechazadas'
-		
-		if [ ! -d "$GRUPO/temporales" ]; then
-			mkdir "$GRUPO/temporales"
-		fi
 
 		ARCHIVOS=$(ls -1 $INST_RECIBIDAS)
 		CANTIDAD=$(echo "$ARCHIVOS" | wc -l)	
@@ -554,14 +556,13 @@ else
 	fi
 fi
 
-
 if [ $AMBIENTE_OK -eq 0 ] && [ ${estaCorriendo} -ne 1 ] ; then
 	#tomar un doc para trabajar y grabar en log el archivo a procesar
 	echo "GrabarParqueU inicia el proceso de los archivos.."
 	for i in ${ARCHIVOS}
 	do
 		TIPO='I'
-		LoguearU.sh $NOMBRE $TIPO "se_inicia_el_proceso_del_archivo:$i"
+		LoguearU.sh $NOMBRE $TIPO "se inicia el proceso del archivo:$i"
 
 		#verificar que no este duplicado
 		NUEVO_NOMBRE=$INSTPROCESADAS'/'$i'.0'
@@ -571,7 +572,6 @@ if [ $AMBIENTE_OK -eq 0 ] && [ ${estaCorriendo} -ne 1 ] ; then
 			#moverlo a inst_procesadas
 			#MoverU $INST_RECIBIDAS'/'$i $INSTPROCESADAS $NOMBRE
 			MoverU.sh $INST_RECIBIDAS'/'$i $INSTPROCESADAS'/' $NOMBRE
-			#procesar archivo ordenado
 			procesarArchivoOrdenado $i
 		else
 			#echo "el archivo $i esta repetido"
@@ -581,5 +581,6 @@ if [ $AMBIENTE_OK -eq 0 ] && [ ${estaCorriendo} -ne 1 ] ; then
 			LoguearU.sh $NOMBRE $TIPO "el archivo:"$i" esta repetido"
 		fi
 	done
+	
 	mostrarCantidadRegistrosProcesados
 fi
