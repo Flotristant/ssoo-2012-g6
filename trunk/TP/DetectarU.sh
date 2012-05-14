@@ -5,7 +5,7 @@ PATH_RECHDIR="$GRUPO/$RECHDIR/"
 PATH_SUCURSALES="$GRUPO/$MAEDIR/sucu.mae"
 PATH_RECIBIDAS="$GRUPO/inst_recibidas/"
 
-SELF="detectar"
+SELF="DetectarU"
 TIME_SLEEP=10
 
 # funcion del demonio en si
@@ -31,8 +31,7 @@ function valNomArchSucursales
 		if [ "$sucursalValida" -eq 1 ] ; then
 			chequearVigenciaSucursal $region $sucursal
 		else
-			loguearU.sh "$SELF" "I" "$file: region-sucursal invalida."
-			mover.sh "$PATH_ARRIDIR/$file" "$PATH_RECHDIR" "$SELF"
+			LoguearU.sh "$SELF" "I" "$file: region-sucursal invalida."
 		fi
 	done
 
@@ -56,11 +55,11 @@ function chequearVigenciaSucursal
 	fi
 
 	if [ "$startDate" -le "$dia" -a "$antesDelFin" = 0 ] ; then
-		loguearU.sh "$SELF" "I" "$file: sucursal valida."
-		mover.sh "$PATH_ARRIDIR/$file" "$PATH_RECIBIDAS" "$SELF"     
+		LoguearU.sh "$SELF" "I" "$file: sucursal valida."
+		MoverU.sh "$PATH_ARRIDIR/$file" "$PATH_RECIBIDAS" "$SELF"     
 	else
-		loguearU.sh "$SELF" "I" "$file: sucursal no esta vigente."
-		mover.sh "$PATH_ARRIDIR/$file" "$PATH_RECHDIR" "$SELF"
+		LoguearU.sh "$SELF" "I" "$file: sucursal no esta vigente."
+		MoverU.sh "$PATH_ARRIDIR/$file" "$PATH_RECHDIR" "$SELF"
 	fi
 
 }
