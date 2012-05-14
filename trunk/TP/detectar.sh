@@ -75,10 +75,9 @@ function ejecutarGrabarParque
 	if [ -n "$lista" ]; then
 		ps -C "GrabarParqueU.sh"|grep --silent 'GrabarParqueU'
 		if [ $? -eq 1 ] ; then
-			GrabarParqueU.sh &
-			echo -e "grabarParque\n"
+			parque=GrabarParqueU.sh &
 			idGrabarParque=`ps -C 'GrabarParqueU.sh' -o pid=` 
-			echo -e "$idGrabarParque\n"
+			echo -e "GrabarParqueU id: $idGrabarParque\n"
 		fi
 	fi
 }
@@ -89,5 +88,4 @@ do
 	sleep $TIME_SLEEP
 done
 
-echo -e "termine\n"
-
+exit(0)
