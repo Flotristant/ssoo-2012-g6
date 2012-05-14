@@ -9,7 +9,7 @@ Instrucciones de Instalacion TP so 75.08 2012 Copyright (c)
 4- Se creara una carpeta con el nombre "grupo06" con subdirectorios y un archivo .sh. NO modifique el nombre de ninguno de los directorios ni archivos.
 
 5- Darle permiso de ejecución al script "instalarU.sh" que se encuentra en el directorio "grupo06" utilizando el siguiente comando:
-> chmod +x ./instalarU.sh
+> chmod +x ./InstalarU.sh
 
 6- Abrir una terminal y moverse al directorio "grupo06".
 
@@ -24,8 +24,8 @@ Instrucciones de Instalacion TP so 75.08 2012 Copyright (c)
 
 10- Una vez iniciado el ambiente, el demonio ya estará corriendo preparado para recibir nuevos archivos en el directorio de arribos y proceder con la correcta ejecución del programa.
 
-11- En caso de querer detener la ejecución del demonio, ubicados en el directorio de binarios, ejecutamos el siguiente comando:
-> ./stopdD.sh
+11- En caso de querer detener la ejecución del demonio, ejecutamos el siguiente comando:
+> StopdD.sh
 
-12- En caso de querer reanudar la ejecución del demonio, ubicados en el directorio de binarios, ejecutamos el siguiente comando:
-> ./startD.sh
+12- En caso de querer reanudar la ejecución del demonio, ejecutamos el siguiente comando:
+> StartD.sh
