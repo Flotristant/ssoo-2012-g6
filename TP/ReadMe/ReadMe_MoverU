@@ -1,0 +1,30 @@
+Instrucciones de MoverU TP so 75.08 2012 Copyright (c)
+
+Función:
+	-Este comando se encarga de mover archivos de un directorio a otro, creando históricos de archivos.
+
+Parámetros:
+	-Recibe 3 parámetros:
+		-Archivo de Origen(1)
+		-Archivo Destino(2)
+		-Comando(3) (opcional)
+		#De no pasarse el parametro (1) o (2) arroja error.
+
+		(1) Archivo que deseamos mover
+		(2) Directorio donde queremos mover el archivo pasado en (1)
+		(3) Comando que invoca MoverU.sh
+			#Si el comando que invoca a MoverU.sh es un comando que escribe en archivos de logs, entonces el movimiento del archivo queda registrado en el archivo de log del comando invocador.
+
+
+Invocación:
+	./MoverU.sh "miDirectorioOrigen/archivo" "miDirectorioDestino/" "miComando"
+
+	-En el directorio destino puede enviarse varias veces archivos con el mismo nombre, por lo cual se va creando un historial cronológico donde se concatena al nombre del archivo un número de secuencia, por ejemplo:
+	 Si se movió 5 veces el archivo "archivo" al mismo directorio destino, se podra ver la lista como:
+		+ archivo.0
+		+ archivo.1
+		+ archivo.2
+		+ archivo.3	
+		+ archivo.4
+
+
