@@ -1,10 +1,13 @@
-SELF="StopD"
+SELF="stopD"
 
+
+daemon=`ps | grep -c DetectarU.sh`
 if [ `ps | grep -c DetectarU.sh` = 1 ] ; then
-	daemon=`ps | grep DetectarU.sh | cut -f 2 -d " "`
+	daemon=`ps -C 'DetectarU.sh' -o pid=`
 	kill $daemon
 else
-	loguearU.sh "$SELF" "E" "demonio no está en ejecución"
+	LoguearU.sh $SELF "E" "el demonio no esta ejecutandose\n"
+	#echo -e "el demonio no esta ejecutandose\n" #mandar al log
 fi
 
 
