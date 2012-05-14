@@ -72,11 +72,16 @@ function ejecutarGrabarParque
 {
 	lista=`ls $PATH_RECIBIDAS`                                    
 	if [ -n "$lista" ]; then
-		ps -C "GrabarParqueU.sh"|grep --silent 'GrabarParqueU'
+		#ps -C "GrabarParqueU.sh"|grep --silent 'GrabarParqueU'
+		PIDS=$(pgrep 'GrabarParqueU')
 		if [ $? -eq 1 ] ; then
-			GrabarParqueU.sh &
+			GrabarParqueU.sh &						
 			idGrabarParque=`ps -C 'GrabarParqueU.sh' -o pid=` 
-			echo -e "GrabarParqueU id: $idGrabarParque\n"
+			if [ -n $idGrabarParque ] ; then	
+				echo -e "GrabarParqueU id: $idGrabarParque\n"	
+			else
+				echo -e "no se pudo iniciar GrabarParqueU.sh\n"
+			fi
 		fi
 	fi
 }
