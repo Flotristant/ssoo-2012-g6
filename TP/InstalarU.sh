@@ -38,7 +38,7 @@ arch_log_i="InstalarU.log"
 archConf="instalarU.conf"
 
 #****Comandos****
-log="./inst/LoguearU.sh instalarU" #permite llamar con "log mensaje"
+log="./inst/LoguearU.sh InstalarU" #permite llamar con "log mensaje"
 chmod +x ./inst/LoguearU.sh
 
 #***********************************************FIN - Variables Generales*************************************
