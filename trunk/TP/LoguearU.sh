@@ -76,7 +76,7 @@ function loguear
 	fi
 
 	#Obtengo los directorios y la extension de los archivos
-	if [ "$1" != "instalarU" ]
+	if [ "$1" != "InstalarU" ]
 	then
 		dirlog=$(obtenerDirectorioLog "$GRUPO/$LOGDIR")
 		extlog=$(obtenerExtensionArchivosLog $LOGEXT)

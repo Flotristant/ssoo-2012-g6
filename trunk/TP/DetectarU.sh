@@ -77,7 +77,7 @@ function ejecutarGrabarParque
 		if [ $? -eq 1 ] ; then
 			GrabarParqueU.sh &						
 			idGrabarParque=`ps -C 'GrabarParqueU.sh' -o pid=` 
-			if [ -n $idGrabarParque ] ; then	
+			if [ $idGrabarParque -ne 0 ] ; then	
 				echo -e "GrabarParqueU id: $idGrabarParque\n"	
 			else
 				echo -e "no se pudo iniciar GrabarParqueU.sh\n"
