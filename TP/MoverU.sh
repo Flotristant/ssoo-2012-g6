@@ -83,20 +83,28 @@ function crearMsjLog
 ###############################################################################################
 cantParametros=$#
 codigoError=0
-if [ $cantParametros -ge 4 ]; then
+if [ $cantParametros -ne 2 ] && [ $cantParametros -ne 3 ]; then
 	#echo "Demasiados argumentos para buscar (maximo 3)"
 	codigoError=3	
+	msj="Uso: [ARCHIVO ORIGEN] [DIRECTORIO DESTINO] [COMANDO]\n"
+	msj=$msj"Mueve archivos de un directorio a otro creando historicos\n"
+	msj=$msj"Cantidad de Parametros incorrecta "
+	echo -e $msj
+	exit $codigoError
 fi
+
+
+
 
 existeDirDestino=$(validarExistenciaDirDestino $2)
 if [ $existeDirDestino -eq 0 ] ; then 	
-	#echo "El directorio '"$2"' no existe, emito codigo de error 2"
+	echo "El directorio '"$2"' no existe"
 	codigoError=2
 fi
 
 existeOriginal=$(validarExistenciaArchOrig $1)
 if [ $existeOriginal -eq 0 ] ; then 	
-	#echo "El Archivo '"$1"' no existe, emito codigo de error 1"
+	echo "El Archivo '"$1"' no existe"
 	codigoError=1
 fi
 ###############################################################################################
@@ -107,16 +115,6 @@ fi
 ##############################COPIADO Y EMISION DE MSJ DE SALIDA###############################
 ###############################################################################################
 
-if [ $codigoError -eq 0 ]; then
-	#####COPIADO#####
-	nombreOriginal=`basename $1`
-	#obtengo el ultimo numero de la secuencia y le concateno el siguiente
-	numeroSec=$(obtenerUltimaSecuencia $nombreOriginal $2)		
-	nombreNuevo=$nombreOriginal"."$numeroSec
-	mv $1 $2$nombreNuevo
-fi
-
-
 #####MSJ SALIDA#####
 chmod 777 LoguearU.sh
 
@@ -125,36 +123,41 @@ chmod 777 LoguearU.sh
 loguear=0
 comando=$3
 if [ ! -z $comando ]; then
-	llamadasLoguearU=`grep -c 'LoguearU.sh' $comando."sh"`
-	if [ $llamadasLoguearU -gt 0 ]; then
-		loguear=1
+	if [ -f $comando."sh" ]; then
+		llamadasLoguearU=`grep -c 'LoguearU.sh' $comando."sh"`
+		if [ $llamadasLoguearU -gt 0 ]; then
+			loguear=1
+		fi
+	else
+		echo -e "El archivo '"$comando.sh"' no existe" 
 	fi
+
 fi
 
 if [ $loguear -eq 1 ]; then
 	case $codigoError in
-		"0")
-			./LoguearU.sh $comando "I" "Se-movio-$1-como-$2$nombreNuevo"
-			;;
 		"1")
-			./LoguearU.sh $comando  "SE" "El-Archivo-$1-no-existe-"
+			LoguearU.sh $comando  "SE" "El-Archivo-$1-no-existe-"
 			;;
 		"2")
-			./LoguearU.sh $comando  "SE" "El-directorio-$2-no-existe"
+			LoguearU.sh $comando  "SE" "El-directorio-$2-no-existe"
 			;;
 		
 		
 	esac
 fi
 
-if [ $codigoError -eq 3 ]; then
-		msj="Uso: [ARCHIVO ORIGEN] [DIRECTORIO DESTINO] [COMANDO]\n"
-		msj=$msj"Mueve archivos de un directorio a otro creando historicos\n"
-		msj=$msj"Cantidad de Parametros incorrecta "
-		echo $msj
-fi		
+if [ $codigoError -eq 0 ]; then
+	#####COPIADO#####
+	nombreOriginal=`basename $1`
+	#obtengo el ultimo numero de la secuencia y le concateno el siguiente
+	numeroSec=$(obtenerUltimaSecuencia $nombreOriginal $2)		
+	nombreNuevo=$nombreOriginal"."$numeroSec
+	mv $1 $2$nombreNuevo
+	LoguearU.sh $comando "I" "Se-movio-$1-como-$2$nombreNuevo"
+fi
 
-exit $codigoError
+
 
 
 

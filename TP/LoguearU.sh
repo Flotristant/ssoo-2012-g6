@@ -1,5 +1,4 @@
 #!/bin/bash
-
 IFS_ANT=$IFS
 IFS='
 '
@@ -8,7 +7,7 @@ IFS='
 
 #1 = COMANDO que llamo a loguear
 #2 = TIPO DE MENSAJE 
-#3 = MENSAJE <- no debe contener espacios
+#3 = MENSAJE
 
 #####CODIGOS DE ERROR#####
 errorCantParametros=1
@@ -19,33 +18,39 @@ cantParametros=3
 
 function obtenerDirectorioLog
 {
-	local logdir
 	#El directorio de log puede venir por variable de ambiente o ser seteado por default
-	if [ -z $LOGDIR ] || [ -z $GRUPO ] ; then
-		logdir=../logdir
+	if [ $1 = "/" ]; then
+		log=../logdir
 	else
-		logdir="$GRUPO/$LOGDIR"
+		if [ ! -d $1 ]; then
+			log=../logdir
+		else
+			log=$1
+		fi
 	fi
-	echo $logdir
+		echo $log
 }
 
 function obtenerExtensionArchivosLog
 {
 	#La extension puede venir por variable de ambiente o ser seteada por default
-	if [ -z $LOGEXT ]; then
-		LOGEXT=log
+	if [ -z $1 ]; then
+		extension=.log
+	else
+		extension=$1
 	fi
-	echo $LOGEXT
+	echo $extension
 }
 
 function obtenerMaximoTamanio
 {
 	#El tamanio maximo del archivo de log me puede venir por var de ambiente o seteada por default
-	if [ -z $DATASIZE ]; then
-		DATASIZE=`expr 100 \* 1024 \* 8`
-		#DATASIZE=500
+	if [ -z $1 ]; then
+		tamDato=`expr 100 \* 1024 \* 8`
+	else
+		tamDato=$1
 	fi
-	echo $DATASIZE
+	echo $tamDato
 }
 
 
@@ -61,13 +66,6 @@ function msjDeError
 
 function loguear
 {
-	##Valido Cantidad de parametros
-	if [ $# -ne $cantParametros ]; then
-		echo "LOG: $1 $2 $3"
-		msj=$(msjDeError $0 "Cantidad de parametros invalida $#")
-		echo -e $msj
-		exit $errorCantParametros
-	fi
 
 	##Verifico tipo de msj
 	if [ "$2" != "I" ] && [ "$2" != "A" ] && [ "$2" != "E" ] && [ "$2" != "SE" ]
@@ -86,7 +84,6 @@ function loguear
 		dirlog="$PWD/confdir";
 		extlog=".log";
 	fi
-
 	#verifico la existencia de los directorios
 	#Cada comando tiene un archivo de log	
 	filename="$1$extlog"
@@ -110,14 +107,14 @@ function loguear
 	
 	#Escribo en el archivo
 	echo "$user $date comando $1: [$2] $3" >> $filepath
-	
 
 	#obtengo el tamanio del archivo
 	tamanioArchivo=$(stat -c%s "$filepath")
-	tamanioMaximo=$(obtenerMaximoTamanio)
+	let tamanioArchivo=($tamanioArchivo/1048576)	
+	tamanioMaximo=$(obtenerMaximoTamanio $LOGSIZE)
 
 	#Verifico el tamanio del archivo de log
-	if [ $tamanioArchivo -ge $tamanioMaximo ]; then
+	if [ $tamanioArchivo -gt $tamanioMaximo ]; then
 		echo "$user $date comando $1: [A] ¡Log excedido!" >> $filepath 
 		#Trunco el archivo
 		file_lines=`cat $filepath | wc -l`
@@ -126,6 +123,17 @@ function loguear
 	fi
 }
 
+##Valido Cantidad de parametros
+if [ $# -ne $cantParametros ]; then
+	msj=$(msjDeError $0 "Cantidad de parametros invalida, se recibieron $# parametros")
+	echo -e $msj
+	exit $errorCantParametros
+fi
+
 loguear $1 $2 $3
+
+
+
 IFS=$IFS_ANT
 exit 0
+

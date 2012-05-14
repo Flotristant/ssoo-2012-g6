@@ -1,9 +1,9 @@
 #! /bin/bash
 
-########################################
-#		Comando GrabarParqueU.sh	   #	
-#			Version 4.0 			   #
-########################################
+##########################################
+#	Comando GrabarParqueU.sh	 #	
+#		Version 4.0 		 #
+##########################################
 
 function estaCorriendoApp
 {

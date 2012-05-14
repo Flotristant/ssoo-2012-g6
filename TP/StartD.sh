@@ -1,6 +1,6 @@
 SELF="StartD"
 
-if [ `ps | grep -c DetectarU.sh` = 0 ] ; then
+if [ `ps -C 'DetectarU.sh' | grep -c DetectarU.sh` = 0 ] ; then
 	if [ -n "$ARRIDIR" -a -n "$RECHDIR" ] ; then
 		DetectarU.sh &
 	else

@@ -1,8 +1,8 @@
 SELF="stopD"
 
 
-daemon=`ps | grep -c DetectarU.sh`
-if [ `ps | grep -c DetectarU.sh` = 1 ] ; then
+daemon=`ps -C 'DetectarU.sh' | grep -c DetectarU.sh`
+if [ $daemon = 1 ] ; then
 	daemon=`ps -C 'DetectarU.sh' -o pid=`
 	kill $daemon
 else

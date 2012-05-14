@@ -199,7 +199,7 @@ function validarPermisos
 ################################################################################
 PID=$(demonioCorriendo)
 #si el demonio esta corriendo no puedo llamar a iniciarlizar nuevamente
-if [ ! $PID -eq 0 ]; then
+if [ ! -z $BINDIR ]; then
 	echo "Ambiente ya inicializado"
 	mostrarVariables
 else
@@ -210,119 +210,120 @@ else
 
 	
 	if [ $archConf -eq 0 ]; then
-	echo -e "No se encuentra el archivo de configuración"
-		INSTAlADO=0
+		echo -e "No se encuentra el archivo de configuración"
+		INSTALADO=0
 	else
 		INSTALADO=1
 	fi
-	export INSTALADO
-
-	if [ $INSTALADO -eq 0 ]; then
-		exit $errorInstalacion
-	fi
-
-	chmod 777 LoguearU.sh	
-
-	obtenerVariablesAmbiente $rutaConf
-	export BINDIR
-	export ARRIDIR
-	export RECHDIR
-	export MAEDIR
-	export GRUPO
-	export LOGDIR
-	export REPODIR
-	export LOGEXT
-	#export LOGSIZE
-	#export DATASIZE
-
-	./LoguearU.sh "IniciarU" "I" "Inicio de ejecución"
-
-	validarExistenciaDirectorios $rutaConf $BINDIR $ARRIDIR $RECHDIR $MAEDIR $LOGDIR $REPODIR $CONFDIR $GRUPO
-	#Informo el estado de los directorios y las variables
-	echo -e $msjEstadoInstalacion
-
-	if [ $resultado -eq 0 ] ; then
-		errorIni=0
-	else
-		./LoguearU.sh "IniciarU" "SE" "Hay componentes pendiente de instalación"
-		errorIni=1
-	fi
-
 	
+	if [ ! $INSTALADO -eq 0 ]; then
+		chmod 777 LoguearU.sh	
 
-	################################################################################
-	#Permisos#######################################################################
-	################################################################################
-	#ASUMO QUE EN EL ARCH DE CONFIGURACION ESTA EL NOMBRE DEL DIR Y NO EL PATH
-	pathMaestros=`echo $PWD | sed "s/$BINDIR/$MAEDIR/"`
-	productos=$pathMaestros"/prod.mae"
-	sucursales=$pathMaestros"/sucu.mae"
-	clientes=$pathMaestros"/cli.mae"
+		obtenerVariablesAmbiente $rutaConf
+		export BINDIR
+		export ARRIDIR
+		export RECHDIR
+		export MAEDIR
+		export GRUPO
+		export LOGDIR
+		export REPODIR
+		export LOGEXT
+		export LOGSIZE
+		export DATASIZE
 
-	error=0
-	permisoProd=$(validarPermisos "r" $productos)
-	if [ $permisoProd -eq 1 ]; then
+		./LoguearU.sh "IniciarU" "I" "Inicio de ejecución"
+
+		validarExistenciaDirectorios $rutaConf $BINDIR $ARRIDIR $RECHDIR $MAEDIR $LOGDIR $REPODIR $CONFDIR $GRUPO
+		#Informo el estado de los directorios y las variables
+		echo -e $msjEstadoInstalacion
+
+		if [ $resultado -eq 0 ] ; then
+			errorIni=0
+		else
+			./LoguearU.sh "IniciarU" "SE" "Hay componentes pendiente de instalación"
+			errorIni=1
+		fi
+
+		
+
+		################################################################################
+		#Permisos#######################################################################
+		################################################################################
+		#ASUMO QUE EN EL ARCH DE CONFIGURACION ESTA EL NOMBRE DEL DIR Y NO EL PATH
+		pathMaestros=`echo $PWD | sed "s/$BINDIR/$MAEDIR/"`
+		productos=$pathMaestros"/prod.mae"
+		sucursales=$pathMaestros"/sucu.mae"
+		clientes=$pathMaestros"/cli.mae"
+
+		error=0
+		permisoProd=$(validarPermisos "r" $productos)
+		if [ $permisoProd -eq 1 ]; then
+			#loguear
+			#echo "IniciarU SE 'El archivo `basename $productos` no existe, o no tiene permisos de lectura'"
+			./LoguearU.sh "IniciarU" "SE" "El archivo `basename $productos` no existe, o no tiene permisos de lectura" 
+			error=1
+		fi
+		permisoSuc=$(validarPermisos "r" $sucursales)
+		if [ $permisoSuc -eq 1 ]; then
+			#loguear
+			#echo "IniciarU SE El archivo `basename $sucursales` no existe, o no tiene permisos de lectura"
+			./LoguearU.sh "IniciarU" "SE" "El archivo `basename $sucursales` no existe, o no tiene permisos de lectura" 
+			error=1
+		fi
+		permisoCli=$(validarPermisos "r" $clientes)
+		if [ $permisoCli -eq 1 ]; then
+			#loguear
+			#echo "IniciarU SE El archivo `basename $clientes` no existe, o no tiene permisos de lectura"
+			./LoguearU.sh "IniciarU" "SE" "El archivo `basename $clientes` no existe, o no tiene permisos de lectura" 
+			error=1
+		fi
+
+
+		#Si hay error de inicializacion arrojo error
+		if [ $errorIni -eq 1 ] ; then
+			return $errorInicializacion
+		fi
+		#Si hay error de permisos o no existe algun maestro arroja error
+		if [ $error -eq 1 ]; then
+			return $errorMaestros
+		fi
+		
+		INICIALIZADO=1
+		export INICIALIZADO
+
+		#Si estoy aca es porque se inicializo correctamente entonces muestro las variables
+		################################################################################
+		#DetectarU######################################################################
+		################################################################################
+		echo "Las Variables de Ambiente son:"
+		mostrarVariables
+
+		#Se le otorga permiso de ejecución a los scripts
+		chmod 777 DetectarU.sh
+		chmod 777 MirarU.sh
+		chmod 777 ListarU.pl
+		chmod 777 GrabarParqueU.sh
+		chmod 777 MoverU.sh
+		chmod 777 StartD.sh
+		chmod 777 StopD.sh
+
+		#PATH
+		PATH=$PATH:$PWD
+		export PATH
+
+		#LANZO EL DEMONIO
+		PID=$(demonioCorriendo)
+		if [ $PID -eq 0 ]; then
+			StartD.sh
+			PID=$(demonioCorriendo)
+		fi
+
 		#loguear
-		#echo "IniciarU SE 'El archivo `basename $productos` no existe, o no tiene permisos de lectura'"
-		./LoguearU.sh "IniciarU" "SE" "El archivo `basename $productos` no existe, o no tiene permisos de lectura" 
-		error=1
+
+		#echo "IniciarU 'Demonio corriendo bajo el Nro: $PID'"	
+		LoguearU.sh "IniciarU" "I" "Demonio corriendo bajo el Nro: $PID"
+		echo "Demonio corriendo bajo el Nro $PID"
 	fi
-	permisoSuc=$(validarPermisos "r" $sucursales)
-	if [ $permisoSuc -eq 1 ]; then
-		#loguear
-		#echo "IniciarU SE El archivo `basename $sucursales` no existe, o no tiene permisos de lectura"
-		./LoguearU.sh "IniciarU" "SE" "El archivo `basename $sucursales` no existe, o no tiene permisos de lectura" 
-		error=1
-	fi
-	permisoCli=$(validarPermisos "r" $clientes)
-	if [ $permisoCli -eq 1 ]; then
-		#loguear
-		#echo "IniciarU SE El archivo `basename $clientes` no existe, o no tiene permisos de lectura"
-		./LoguearU.sh "IniciarU" "SE" "El archivo `basename $clientes` no existe, o no tiene permisos de lectura" 
-		error=1
-	fi
-
-
-	#Si hay error de inicializacion arrojo error
-	if [ $errorIni -eq 1 ] ; then
-		exit $errorInicializacion
-	fi
-	#Si hay error de permisos o no existe algun maestro arroja error
-	if [ $error -eq 1 ]; then
-		exit $errorMaestros
-	fi
-	
-	INICIALIZADO=1
-	export INICIALIZADO
-
-	#Si estoy aca es porque se inicializo correctamente entonces muestro las variables
-	################################################################################
-	#DetectarU######################################################################
-	################################################################################
-	echo "Las Variables de Ambiente son:"
-	mostrarVariables
-
-	#Se le otorga permiso de ejecución a los scripts
-	chmod 777 DetectarU.sh
-	chmod 777 MirarU.sh
-	chmod 777 ListarU.pl
-	chmod 777 GrabarParqueU.sh
-	chmod 777 MoverU.sh
-	chmod 777 StartD.sh
-	chmod 777 StopD.sh
-
-	#PATH
-	PATH=$PATH:$PWD
-	export PATH
-
-	#LANZO EL DEMONIO
-	StartD.sh
-	#loguear
-	PID=$(demonioCorriendo)
-	#echo "IniciarU 'Demonio corriendo bajo el Nro: $PID'"	
-	LoguearU.sh "IniciarU" "I" "Demonio corriendo bajo el Nro: $PID"
-	echo "Demonio corriendo bajo el Nro $PID"
-
 fi	
 
 
