@@ -558,7 +558,7 @@ fi
 
 if [ $AMBIENTE_OK -eq 0 ] && [ ${estaCorriendo} -ne 1 ] ; then
 	#tomar un doc para trabajar y grabar en log el archivo a procesar
-	echo "GrabarParqueU inicia el proceso de los archivos.."
+	#echo "GrabarParqueU inicia el proceso de los archivos.."
 	for i in ${ARCHIVOS}
 	do
 		TIPO='I'
