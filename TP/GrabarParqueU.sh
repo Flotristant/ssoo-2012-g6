@@ -145,13 +145,13 @@ function validarCantidadCampos
 #$1: registro
 function validarCabecera 
 {
-	echo $1 | grep --silent  ',"Y",[^,]*$'
+	echo $1 | grep --silent  ',Y,[^,]*$'
 	return $?	
 }
 
 function validarDetalle
 {
-	echo $1 | grep --silent  ',"N",[^,]*$'
+	echo $1 | grep --silent  ',N,[^,]*$'
 	return $?
 }
 
