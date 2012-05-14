@@ -74,7 +74,7 @@ function ejecutarGrabarParque
 	if [ -n "$lista" ]; then
 		ps -C "GrabarParqueU.sh"|grep --silent 'GrabarParqueU'
 		if [ $? -eq 1 ] ; then
-			parque=GrabarParqueU.sh &
+			GrabarParqueU.sh &
 			idGrabarParque=`ps -C 'GrabarParqueU.sh' -o pid=` 
 			echo -e "GrabarParqueU id: $idGrabarParque\n"
 		fi
