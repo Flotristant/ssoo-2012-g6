@@ -35,11 +35,11 @@ COMANDOS=("LoguearU.sh" "MoverU.sh" "DetectarU.sh" "GrabarParqueU.sh" "IniciarU.
 ARCHIVOS=("prod.mae" "sucu.mae" "cli.mae")
 ARCH_OBL=(${COMANDOS[*]} ${ARCHIVOS[*]})
 
-arch_log_i="instalarU.log"
-archConf="instalarU.conf"
+arch_log_i="InstalarU.log"
+archConf="InstalarU.conf"
 
 #****Comandos****
-log="./inst/LoguearU.sh instalarU" #permite llamar con "log mensaje"
+log="./inst/LoguearU.sh InstalarU" #permite llamar con "log mensaje"
 chmod +x ./inst/LoguearU.sh
 
 #***********************************************FIN - Variables Generales*************************************
