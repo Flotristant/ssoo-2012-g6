@@ -204,13 +204,13 @@ if [ ! -z $BINDIR ]; then
 	mostrarVariables
 else
 
-	rutaConf=../confdir/instalarU.conf
+	rutaConf="../confdir/InstalarU.conf"
 	archConf=$(validarExistenciaArch $rutaConf)
 
 
 	
 	if [ $archConf -eq 0 ]; then
-		echo -e "No se encuentra el archivo de configuración"
+		echo -e "No se encuentra el archivo de configuración en: $rutaConf"
 		INSTALADO=0
 	else
 		INSTALADO=1
