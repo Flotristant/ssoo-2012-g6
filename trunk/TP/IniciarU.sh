@@ -231,7 +231,7 @@ else
 		export LOGSIZE
 		export DATASIZE
 
-		./LoguearU.sh "IniciarU" "I" "Inicio de ejecución"
+		LoguearU.sh "IniciarU" "I" "Inicio de ejecución"
 
 		validarExistenciaDirectorios $rutaConf $BINDIR $ARRIDIR $RECHDIR $MAEDIR $LOGDIR $REPODIR $CONFDIR $GRUPO
 		#Informo el estado de los directorios y las variables
