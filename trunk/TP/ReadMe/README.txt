@@ -19,6 +19,9 @@ Instrucciones de Instalacion TP so 75.08 2012 Copyright (c)
 8- Si en cambio desea instalar los comandos de a uno por vez ejecute en cada paso el comando:
 > ./InstalarU.sh <nombre de archivo .sh o .pl>
 
+*******************************************************************************************************************************************************************
+* ATENCIÓN: es importante que no ejecute ningún comando hasta que la instalación haya sido completada, es decir, que todos los componentes se encuentren		  * * instalados 																																					  * *******************************************************************************************************************************************************************
+
 9- Una vez terminado el proceso de instalación, nos paramos en el directorio de binarios e iniciamos el ambiente de la siguiente manera
 > . ./IniciarU.sh
 
