@@ -137,10 +137,10 @@ fi
 if [ $loguear -eq 1 ]; then
 	case $codigoError in
 		"1")
-			LoguearU.sh $comando  "SE" "El-Archivo-$1-no-existe-"
+			LoguearU.sh $comando  "SE" "El Archivo $1 no existe "
 			;;
 		"2")
-			LoguearU.sh $comando  "SE" "El-directorio-$2-no-existe"
+			LoguearU.sh $comando  "SE" "El directorio $2 no existe"
 			;;
 		
 		
@@ -154,7 +154,7 @@ if [ $codigoError -eq 0 ]; then
 	numeroSec=$(obtenerUltimaSecuencia $nombreOriginal $2)		
 	nombreNuevo=$nombreOriginal"."$numeroSec
 	mv $1 $2$nombreNuevo
-	LoguearU.sh $comando "I" "Se-movio-$1-como-$2$nombreNuevo"
+	LoguearU.sh $comando "I" "Se movio $1 como $2$nombreNuevo"
 fi
 
 
