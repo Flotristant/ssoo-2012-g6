@@ -32,6 +32,7 @@ function valNomArchSucursales
 			chequearVigenciaSucursal $region $sucursal
 		else
 			LoguearU.sh "$SELF" "I" "$file: region-sucursal invalida."
+			MoverU.sh "$PATH_ARRIDIR/$file" "$PATH_RECHDIR" "$SELF"
 		fi
 	done
 
