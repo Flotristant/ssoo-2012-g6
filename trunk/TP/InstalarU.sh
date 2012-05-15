@@ -4,6 +4,7 @@
 #*******************************************Variables generales********************************************
 msgError="Proceso de instalacion cancelado"
 instalar=0
+parametro=0
 respuesta=""
 dirValidado=""
 
@@ -34,11 +35,11 @@ COMANDOS=("LoguearU.sh" "MoverU.sh" "DetectarU.sh" "GrabarParqueU.sh" "IniciarU.
 ARCHIVOS=("prod.mae" "sucu.mae" "cli.mae")
 ARCH_OBL=(${COMANDOS[*]} ${ARCHIVOS[*]})
 
-arch_log_i="InstalarU.log"
+arch_log_i="instalarU.log"
 archConf="instalarU.conf"
 
 #****Comandos****
-log="./inst/LoguearU.sh InstalarU" #permite llamar con "log mensaje"
+log="./inst/LoguearU.sh instalarU" #permite llamar con "log mensaje"
 chmod +x ./inst/LoguearU.sh
 
 #***********************************************FIN - Variables Generales*************************************
@@ -85,6 +86,18 @@ function preguntarDirectorio {
 	dirValidado=$resp
 }
 
+function validarParametro 
+{
+	parametro=$(echo "$1" | grep '^DetectarU.sh$\|^IniciarU.sh$\|^StopD.sh$\|^StartD.sh$\|GrabarParqueU.sh$\|^ListarU.pl$')
+	if [ -z $parametro ]; then
+		echo "Debe escribir correctamente el nombre de los comandos, asegurese de leer el archivo README.txt"
+		$log E "Debe escribir correctamente el nombre de los comandos, asegurese de leer el archivo README.txt"
+		echo "Los parametros se escriben como: *IniciarU.sh *DetectarU.sh *GrabarParqueU.sh *StartD.sh *StopD.sh"
+		$log E "Los parametros se escriben como: *IniciarU.sh *DetectarU.sh *GrabarParqueU.sh *StartD.sh *StopD.sh"
+		exit 3
+	fi
+}
+
 function leerVariablesDeConfiguracion
 {
 	GRUPO=`grep "GRUPO" "$1" | cut -d"=" -f 2`
@@ -115,7 +128,7 @@ function validarPerl {
 		echo -e $msgErrorPerl
 		$log E "$msgErrorPerl"
 		$log E "Proceso de instalacion cancelado"
-		exit 0
+		exit 4
 	else
 		echo "Perl Version:$PERLV"
 		$log I "Perl Version:$PERLV"
@@ -156,8 +169,8 @@ function confirmarInicioInstalacion
 {
 	#***Confirmar inicio de instalacion***
 	
-	$log I "Iniciando Instalacion. Esta Ud. seguro? (Si-No)"
-	pregunta "Iniciando Instalacion. Esta Ud. seguro? (Si-No)"
+	$log I "Iniciando Instalacion. Esta Ud. seguro?"
+	pregunta "Iniciando Instalacion. Esta Ud. seguro?"
 	if [ $respuesta -eq 1 ] 
 	then # continuar instalacion
 		instalar=1
@@ -404,8 +417,8 @@ function cargarParametrosInstalacion
 		MostrarDatosInstalacion
 		$log I "Estado de la instalacion: LISTA"
 		echo "Estado de la instalacion: LISTA"
-		$log I "Los datos ingresados son correctos? (Si-No)"
-		pregunta "Los datos ingresados son correctos? (Si-No)"
+		$log I "Los datos ingresados son correctos?"
+		pregunta "Los datos ingresados son correctos?"
 		if [ $respuesta -eq 1 ] 
 		then # permitir instalacion
 			instalado=1
@@ -418,11 +431,30 @@ function cargarParametrosInstalacion
 
 function verificarEstadoInstalacion
 {
+	if ! [ -z "$1" ]; then
+		if [ -f $DIRPPAL/$BINDIR/"$1" ]; then
+			$log A "El comando ya se encuentra instalado"
+			echo "El comando ya se encuentra instalado"
+			echo "Componentes faltantes: "
+			$log I "Componentes faltantes: "
+
+			if ! [ -f $DIRPPAL/$BINDIR/"IniciarU.sh" ]; then echo "*IniciarU.sh"; $log I "*IniciarU.sh ";fi
+			if ! [ -f $DIRPPAL/$BINDIR/"DetectarU.sh" ]; then echo "*DetectarU.sh"; $log I "*DetectarU.sh ";fi
+			if ! [ -f $DIRPPAL/$BINDIR/"ListarU.pl" ]; then echo "*ListarU.pl"; $log I "*ListarU.pl ";fi
+			if ! [ -f $DIRPPAL/$BINDIR/"GrabarParqueU.sh" ]; then echo "*GrabarParqueU.sh"; $log I "*GrabarParqueU.sh ";fi
+			if ! [ -f $DIRPPAL/$BINDIR/"StartD.sh" ]; then echo "*StartD.sh"; $log I "*StartD.sh ";fi
+			if ! [ -f $DIRPPAL/$BINDIR/"StopD.sh" ]; then echo "*StopD.sh"; $log I "*StopD.sh ";fi	
+			$log A "Fin de la instalacion"
+			echo "Fin de la instalacion"
+			exit 0;
+		fi 
+	fi
+
 	if [ ! -d $DIRPPAL/$BINDIR ]; then
 		echo "Hubo un error en la instalacion, el directorio $BINDIR no existe"
 	else
 		cont=0
-		if [ -f $DIRPPAL/$BINDIR/"LniciarU.sh" ]; then cont=$[ $cont + 1 ]; fi
+		if [ -f $DIRPPAL/$BINDIR/"IniciarU.sh" ]; then cont=$[ $cont + 1 ]; fi
 		if [ -f $DIRPPAL/$BINDIR/"DetectarU.sh" ]; then cont=$[ $cont + 1 ]; fi
 		if [ -f $DIRPPAL/$BINDIR/"ListarU.pl" ]; then cont=$[ $cont + 1 ]; fi
 		if [ -f $DIRPPAL/$BINDIR/"GrabarParqueU.sh" ]; then cont=$[ $cont + 1 ]; fi
@@ -458,8 +490,13 @@ function verificarEstadoInstalacion
 			echo "Estado de la instalacion: INCOMPLETA"
 			$log I "Estado de la instalacion: INCOMPLETA"
 			
-			$log I "Desea completar la instalacion? (Si-No)"
-			pregunta "Desea completar la instalacion? (Si-No)"
+			if [ -z "$1" ]; then
+				$log I "Desea completar la instalacion?"
+				pregunta "Desea completar la instalacion?"
+			else
+				$log I "Desea instalar el componente?"
+				pregunta "Desea instalar el componente?"
+			fi			
 			if [ $respuesta -eq 0 ] 
 			then
 				clear
@@ -681,7 +718,7 @@ then
 	echo 'No se puede iniciar la instalación.'
 	echo  'Por favor lea el archivo README.txt y vuelva a realizar la instalación'
 	echo ""
-	exit 0
+	exit 1
 fi
 
 #Creo el directorio /confdir
@@ -701,7 +738,7 @@ for ((i=0;i<${#ARCH_OBL[*]};i++)); do
 		echo $msgError
 		echo "Verifique que ${ARCH_OBL[$i]} exista"
 		echo ""
-		exit 0
+		exit 2
 	fi
 done
 cd ..
@@ -713,6 +750,12 @@ then
 	touch "$CONFDIR/$arch_log_i"	
 fi
 
+#Verificar nombre del parametro si existe
+if ! [ -z "$1" ]; then
+	validarParametro "$1"
+fi
+
+parametro="$1"
 
 #inicio ejecucion
 $log I "Inicio de Ejecucion"
@@ -720,7 +763,7 @@ $log I "Inicio de Ejecucion"
 if [ -e "$CONFDIR/$archConf" ]
 then
 	leerVariablesDeConfiguracion "$CONFDIR/$archConf"
-	verificarEstadoInstalacion
+	verificarEstadoInstalacion "$parametro"
 	validarPerl
 	MostrarDatosInstalacion
 	confirmarInicioInstalacion
@@ -732,10 +775,10 @@ fi
 
 if [ $instalar -eq 1 ]
 then
-	if [ -z "$1" ]; then		
+	if [ -z "$parametro" ]; then		
 		completarInstalacion
 	else
-		instalarComando "$1"
+		instalarComando "$parametro"
 	fi
 fi
 
