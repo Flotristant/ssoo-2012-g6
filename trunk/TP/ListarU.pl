@@ -4,12 +4,12 @@
 # probar configuracion.
 
 
-my $REPODIR = "../REPODIR";
-my $MAEDIR = "../MAEDIR";
-my $MAECLI = "/clientes_maestro";
-my $MAESUC = "/sucursales_maestro";
-my $PARQUEDIR = "../PARQUE";
+my $REPODIR = "";
+my $MAEDIR = "";
+my $PARQUEDIR = "";
 my $REPONOM = "";
+my $MAECLI = "/cli.mae";
+my $MAESUC = "/sucu.mae";
 
 sub verificarArchivo{
 	my $file = shift();
@@ -94,7 +94,7 @@ sub chequearNumeros{
 	my @rangoSuc = @{shift()};
 	my $inicio;
 	my $fin;
-	if ($sucursales[0] ne "*"){
+	if ($rangoSuc[0] ne "*"){
 		$inicio = $rangoSuc[0];
 		$fin = $rangoSuc[1];
 		if ( ($inicio =~ /\D+/) || ($fin =~ /\D+/) ){
@@ -103,7 +103,7 @@ sub chequearNumeros{
 	}
 	return($noNumeros);
 } #OK
-
+ 
 #{ $a <=> $b }
 sub imprimirSalida{
 	my $filedir = $REPODIR.$REPONOM;
@@ -132,7 +132,7 @@ sub imprimirSalida{
 
 	if ($op eq "-c" || $op eq "-ce" ){
 
-		print "\nParametros De Invocacion:\n";
+		print "\n[Parametros De Invocacion]\n";
 		print "Items: ";
 		mostrarVector(\@items);
 		print "Sucursales: ";
@@ -169,6 +169,7 @@ sub imprimirSalida{
 	
 	$cliTemp = "";
 	$subTotal = 0;
+	$total = 0;
 	foreach $i (sort keys( %hash )){
 		$cliTemp = $i;
 		last;
@@ -178,7 +179,7 @@ sub imprimirSalida{
 	if ($op eq "-e" || $op eq "-ce" ){
 
 		open(ENTRADA, ">$filedir");		
-		print ENTRADA "Parametros De Invocacion:\n";
+		print ENTRADA "[Parametros De Invocacion]\n";
 		print ENTRADA "Items: < ";
 		foreach $dato (@items){
 			print ENTRADA "$dato ";
@@ -352,7 +353,7 @@ sub consulta{
 		
 			next if( $file eq "." || $file eq ".." );
 			$filedir = "$PARQUEDIR/$file";
-			print "file:$file         fileDir:$filedir\n";
+			#print "file:$file         fileDir:$filedir\n";
 			#if (-f $filedir){ print "ES legible\n";}
 			#if (-x $filedir){ print "ES ejecutable\n";}
 			
@@ -403,7 +404,7 @@ sub setearNombreRepo{
 	}
 	closedir(REPODIR);
 	$max += 1;
-	$REPONOM = "lpi_".$max;
+	$REPONOM = "/lpi_".$max;
 } #OK
 
 sub configuracion{
@@ -466,9 +467,15 @@ sub configuracion{
 } #OK
 
 
-#Inicio del proceso
+# -->Inicio del proceso
+
+# Chequeo de parametros vacios
 $tam = @ARGV;
-if ( $tam > 5 ) { die("Error: El numero maximo de parametros en la consulta es 4."); }
+if ( $tam != 5 && $ARGV[0] ne "-h" ) { 
+	die("Error: El numero de parametros en la consulta debe ser 4.(el unico parametro vacio posible es el ultimo, se lo selecciona con comillas dobles vacias \"\").\n"); 
+}if ( ( $ARGV[1] eq "" || $ARGV[2] eq "" || $ARGV[3] eq "") && $ARGV[0] ne "-h" ){
+	die("Error: No puede haber parametros vacios (excepto el ultimo), ya que la respuesta de la consulta resulta nula.\n");
+}
 
 # Obtencion de parametros
 %parametros = obtenerParametros();
