@@ -21,9 +21,23 @@ function mostrarArchivos
 	#Devuelve los archivos dentro del path
 	lista=`ls -1 $1`
 	archivosBin="PATH = "`echo $1`"\nArchivos: "$lista"\n\n"
-	echo $archivosBin
-	
+	echo $archivosBin	
 }
+
+function cantArchivos
+{
+	array=( $( ls $1 ) )
+	cantArchivos=${#array[@]}
+
+	#Tiene que haber 9 archivos
+	cantCorrecta=0
+	if [ $cantArchivos -eq 9 ]; then
+		cantCorrecta=1
+	fi
+
+	echo $cantCorrecta
+}
+
 
 function mostrarVariables
 {
@@ -207,8 +221,6 @@ else
 	rutaConf="../confdir/InstalarU.conf"
 	archConf=$(validarExistenciaArch $rutaConf)
 
-
-	
 	if [ $archConf -eq 0 ]; then
 		echo -e "No se encuentra el archivo de configuración en: $rutaConf"
 		INSTALADO=0
@@ -216,116 +228,130 @@ else
 		INSTALADO=1
 	fi
 	
+	
 	if [ ! $INSTALADO -eq 0 ]; then
 		chmod 777 LoguearU.sh	
 
 		obtenerVariablesAmbiente $rutaConf
-		export BINDIR
-		export ARRIDIR
-		export RECHDIR
-		export MAEDIR
-		export GRUPO
-		export LOGDIR
-		export REPODIR
-		export LOGEXT
-		export LOGSIZE
-		export DATASIZE
 
-		LoguearU.sh "IniciarU" "I" "Inicio de ejecución"
+		comandosOK=$(cantArchivos "$GRUPO/$BINDIR")
 
-		validarExistenciaDirectorios $rutaConf $BINDIR $ARRIDIR $RECHDIR $MAEDIR $LOGDIR $REPODIR $CONFDIR $GRUPO
-		#Informo el estado de los directorios y las variables
-		echo -e $msjEstadoInstalacion
+		if [ $comandosOK -eq 1 ]; then
+			export BINDIR
+			export ARRIDIR
+			export RECHDIR
+			export MAEDIR
+			export GRUPO
+			export LOGDIR
+			export REPODIR
+			export LOGEXT
+			export LOGSIZE
+			export DATASIZE
 
-		if [ $resultado -eq 0 ] ; then
-			errorIni=0
-		else
-			./LoguearU.sh "IniciarU" "SE" "Hay componentes pendiente de instalación"
-			errorIni=1
-		fi
+			LoguearU.sh "IniciarU" "I" "Inicio de ejecución"
+
+			validarExistenciaDirectorios $rutaConf $BINDIR $ARRIDIR $RECHDIR $MAEDIR $LOGDIR $REPODIR $CONFDIR $GRUPO
+			#Informo el estado de los directorios y las variables
+			echo -e $msjEstadoInstalacion
+
+			if [ $resultado -eq 0 ] ; then
+				errorIni=0
+			else
+				./LoguearU.sh "IniciarU" "SE" "Hay componentes pendiente de instalación"
+				errorIni=1
+			fi
 
 		
 
-		################################################################################
-		#Permisos#######################################################################
-		################################################################################
-		#ASUMO QUE EN EL ARCH DE CONFIGURACION ESTA EL NOMBRE DEL DIR Y NO EL PATH
-		pathMaestros=`echo $PWD | sed "s/$BINDIR/$MAEDIR/"`
-		productos=$pathMaestros"/prod.mae"
-		sucursales=$pathMaestros"/sucu.mae"
-		clientes=$pathMaestros"/cli.mae"
+			################################################################################
+			#Permisos#######################################################################
+			################################################################################
+			#ASUMO QUE EN EL ARCH DE CONFIGURACION ESTA EL NOMBRE DEL DIR Y NO EL PATH
+			pathMaestros=`echo $PWD | sed "s/$BINDIR/$MAEDIR/"`
+			productos=$pathMaestros"/prod.mae"
+			sucursales=$pathMaestros"/sucu.mae"
+			clientes=$pathMaestros"/cli.mae"
 
-		error=0
-		permisoProd=$(validarPermisos "r" $productos)
-		if [ $permisoProd -eq 1 ]; then
-			#loguear
-			#echo "IniciarU SE 'El archivo `basename $productos` no existe, o no tiene permisos de lectura'"
-			./LoguearU.sh "IniciarU" "SE" "El archivo `basename $productos` no existe, o no tiene permisos de lectura" 
-			error=1
-		fi
-		permisoSuc=$(validarPermisos "r" $sucursales)
-		if [ $permisoSuc -eq 1 ]; then
-			#loguear
-			#echo "IniciarU SE El archivo `basename $sucursales` no existe, o no tiene permisos de lectura"
-			./LoguearU.sh "IniciarU" "SE" "El archivo `basename $sucursales` no existe, o no tiene permisos de lectura" 
-			error=1
-		fi
-		permisoCli=$(validarPermisos "r" $clientes)
-		if [ $permisoCli -eq 1 ]; then
-			#loguear
-			#echo "IniciarU SE El archivo `basename $clientes` no existe, o no tiene permisos de lectura"
-			./LoguearU.sh "IniciarU" "SE" "El archivo `basename $clientes` no existe, o no tiene permisos de lectura" 
-			error=1
-		fi
+			error=0
+			permisoProd=$(validarPermisos "r" $productos)
+			if [ $permisoProd -eq 1 ]; then
+				#loguear
+				#echo "IniciarU SE 'El archivo `basename $productos` no existe, o no tiene permisos de lectura'"
+				./LoguearU.sh "IniciarU" "SE" "El archivo `basename $productos` no existe, o no tiene permisos de lectura" 
+				error=1
+			fi
+			permisoSuc=$(validarPermisos "r" $sucursales)
+			if [ $permisoSuc -eq 1 ]; then
+				#loguear
+				#echo "IniciarU SE El archivo `basename $sucursales` no existe, o no tiene permisos de lectura"
+				./LoguearU.sh "IniciarU" "SE" "El archivo `basename $sucursales` no existe, o no tiene permisos de lectura" 
+				error=1
+			fi
+			permisoCli=$(validarPermisos "r" $clientes)
+			if [ $permisoCli -eq 1 ]; then
+				#loguear
+				#echo "IniciarU SE El archivo `basename $clientes` no existe, o no tiene permisos de lectura"
+				./LoguearU.sh "IniciarU" "SE" "El archivo `basename $clientes` no existe, o no tiene permisos de lectura" 
+				error=1
+			fi
 
 
-		#Si hay error de inicializacion arrojo error
-		if [ $errorIni -eq 1 ] ; then
-			return $errorInicializacion
-		fi
-		#Si hay error de permisos o no existe algun maestro arroja error
-		if [ $error -eq 1 ]; then
-			return $errorMaestros
-		fi
+			#Si hay error de inicializacion arrojo error
+			if [ $errorIni -eq 1 ] ; then
+				return $errorInicializacion
+			fi
+			#Si hay error de permisos o no existe algun maestro arroja error
+			if [ $error -eq 1 ]; then
+				return $errorMaestros
+			fi
 		
-		INICIALIZADO=1
-		export INICIALIZADO
+			INICIALIZADO=1
+			export INICIALIZADO
 
-		#Si estoy aca es porque se inicializo correctamente entonces muestro las variables
-		################################################################################
-		#DetectarU######################################################################
-		################################################################################
-		echo "Las Variables de Ambiente son:"
-		mostrarVariables
+			#Si estoy aca es porque se inicializo correctamente entonces muestro las variables
+			################################################################################
+			#DetectarU######################################################################
+			################################################################################
+			echo "Las Variables de Ambiente son:"
+			mostrarVariables
 
-		#Se le otorga permiso de ejecución a los scripts
-		chmod 777 DetectarU.sh
-		chmod 777 MirarU.sh
-		chmod 777 ListarU.pl
-		chmod 777 GrabarParqueU.sh
-		chmod 777 MoverU.sh
-		chmod 777 StartD.sh
-		chmod 777 StopD.sh
+			#Se le otorga permiso de ejecución a los scripts
+			chmod 777 DetectarU.sh
+			chmod 777 MirarU.sh
+			chmod 777 ListarU.pl
+			chmod 777 GrabarParqueU.sh
+			chmod 777 MoverU.sh
+			chmod 777 StartD.sh
+			chmod 777 StopD.sh
 
-		#PATH
-		PATH=$PATH:$PWD
-		export PATH
+			#PATH
+			PATH=$PATH:$PWD
+			export PATH
 
-		#LANZO EL DEMONIO
-		PID=$(demonioCorriendo)
-		if [ $PID -eq 0 ]; then
-			StartD.sh
+			#LANZO EL DEMONIO
 			PID=$(demonioCorriendo)
+			if [ $PID -eq 0 ]; then
+				StartD.sh
+				PID=$(demonioCorriendo)
+			fi
+
+			#loguear
+
+			#echo "IniciarU 'Demonio corriendo bajo el Nro: $PID'"	
+			LoguearU.sh "IniciarU" "I" "Demonio corriendo bajo el Nro: $PID"
+			echo "Demonio corriendo bajo el Nro $PID"
+		else
+			echo -e "\n\nFaltan algunos comandos necesarios para el correcto uso de la aplicación\n\n"
+			echo "Comandos existentes:"
+			msj=$(mostrarArchivos "$GRUPO/$BINDIR")
+			echo -e $msj
+			echo -e "Deberian existir los siguientes comandos"
+			echo "DetectarU.sh GrabarParqueU.sh IniciarU.sh ListarU.pl LoguearU.sh MirarU.sh MoverU.sh StartD.sh StopD.sh"		
+			echo -e "\nPor favor, realize una reinstalación completa, o instale los comandos faltantes"
+
 		fi
-
-		#loguear
-
-		#echo "IniciarU 'Demonio corriendo bajo el Nro: $PID'"	
-		LoguearU.sh "IniciarU" "I" "Demonio corriendo bajo el Nro: $PID"
-		echo "Demonio corriendo bajo el Nro $PID"
 	fi
 fi	
-
 
 
 
