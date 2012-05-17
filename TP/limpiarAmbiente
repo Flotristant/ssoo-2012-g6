@@ -1,0 +1,19 @@
+function limpiarAmbiente
+{
+    #Si la variable BINDIR esta inicializada, es porque el ambiente esta inicializado, en cuyo caso lo limpio
+    #ya verifique que si pones variable="" te la toma como no seteada
+    if [ ! -z $BINDIR ]; then
+        BINDIR=""
+        ARRIDIR=""
+        RECHDIR=""
+        MAEDIR=""
+        GRUPO=""
+        LOGDIR=""
+        REPODIR=""
+        LOGEXT=""
+        LOGSIZE=""
+        DATASIZE=""
+    fi
+
+}
+
